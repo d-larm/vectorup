@@ -1,0 +1,49 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/daniel/dcs/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-ga/values-ga.xml",
+            "map": [
+                {
+                    "source": "/home/daniel/dcs/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/bundles/debug/res/values-ga/values-ga.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,112,175,266",
+                        "endColumns": "56,62,90,91",
+                        "endOffsets": "107,170,261,353"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-ga/values-ga.xml",
+            "map": [
+                {
+                    "source": "/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/bundles/debug/res/values-ga/values-ga.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,112,175,266",
+                        "endColumns": "56,62,90,91",
+                        "endOffsets": "107,170,261,353"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/dcs/15/u1501624/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-ga/values-ga.xml",
+            "map": [
+                {
+                    "source": "/dcs/15/u1501624/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/bundles/debug/res/values-ga/values-ga.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,112,175,266",
+                        "endColumns": "56,62,90,91",
+                        "endOffsets": "107,170,261,353"
+                    }
+                }
+            ]
+        }
+    ]
+}

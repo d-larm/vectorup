@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ff252525"
+    tools:context="com.vmu.vectormeup.MainActivity">
+
+
+    <RelativeLayout
+        android:id="@+id/imageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/options">
+
+        <ImageView
+            android:id="@+id/myImageView"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="19dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/border"
+            android:cropToPadding="false"
+            android:fadingEdge="vertical"
+            android:longClickable="true"
+            android:scaleType="centerInside"
+            android:soundEffectsEnabled="true"
+            tools:layout_editor_absoluteX="34dp"
+            tools:layout_editor_absoluteY="16dp"
+            tools:longClickable="true" />
+
+        <TextView
+            android:id="@+id/myImageViewText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/myImageView"
+            android:layout_alignLeft="@+id/myImageView"
+            android:layout_alignRight="@+id/myImageView"
+            android:layout_alignTop="@+id/myImageView"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Select image"
+            android:textColor="#FFFF" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/myImageView"
+        android:layout_marginTop="25dp"
+        android:gravity="bottom|center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/options"
+            android:layout_weight="0.2"
+            android:stretchColumns="*">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/colourLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_weight="0.10"
+                    android:gravity="center"
+                    android:text="Colours"
+                    android:textColor="#FFF" />
+
+                <SeekBar
+                    android:id="@+id/colors"
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="0.48"
+                    android:max="7"
+                    android:progress="7" />
+
+                <TextView
+                    android:id="@+id/colorValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="0.10"
+                    android:gravity="center"
+                    android:text="256"
+                    android:textColor="#FFF"
+                    android:tooltipText="Changes number of samples taken for colour quantisation process" />
+            </TableRow>
+
+            <!--<TableRow>-->
+            <!--<TextView-->
+            <!--android:id="@+id/pointsLabel"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:gravity="center"-->
+            <!--android:text="Max Points"-->
+            <!--android:textColor="#FFF"-->
+            <!--android:layout_weight="0.10" />-->
+
+            <!--<SeekBar-->
+            <!--android:id="@+id/maxPoints"-->
+            <!--style="@style/Widget.AppCompat.SeekBar.Discrete"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginRight="30dp"-->
+            <!--android:layout_weight="0.48"-->
+            <!--android:max="10"-->
+            <!--android:progress="3" />-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/pointsValue"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:layout_marginLeft="15dp"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:gravity="center"-->
+            <!--android:text="1000"-->
+            <!--android:tooltipText="Changes number of samples taken for colour quantisation process"-->
+            <!--android:textColor="#FFF"-->
+            <!--android:layout_weight="0.10" />-->
+            <!--</TableRow>-->
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/sampleLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_weight="0.10"
+                    android:gravity="center"
+                    android:text="Sample Factor"
+                    android:textColor="#FFF"
+                    android:tooltipText="Changes number of samples taken for colour quantisation process" />
+
+                <SeekBar
+                    android:id="@+id/sampleFactor"
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="0.48"
+                    android:max="9"
+                    android:progress="9" />
+
+                <TextView
+                    android:id="@+id/sampleValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="0.10"
+                    android:gravity="center"
+                    android:text="10"
+                    android:textColor="#FFF"
+                    android:tooltipText="Changes number of samples taken for colour quantisation process" />
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:id="@+id/startButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:background="#696969"
+                    android:text="Vectorise"
+                    android:textColor="#FFF" />
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </TableLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@+id/options"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:gravity="bottom"
+        android:layout_marginTop="25dp"
+        android:weightSum="1"
+        android:id="@+id/startSection">
+
+
+        <Button
+            android:id="@+id/vectorise"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Vectorise"
+            android:textColor="#FFF"
+            android:layout_weight="1"
+            android:background="#696969" />
+
+        </LinearLayout>
+
+
+
+</RelativeLayout>

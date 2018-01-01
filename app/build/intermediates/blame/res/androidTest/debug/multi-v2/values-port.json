@@ -1,0 +1,34 @@
+{
+    "logs": [
+        {
+            "outputFile": "/dcs/15/u1501624/AndroidStudioProjects/VectorMeUp/app/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "/dcs/15/u1501624/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.0.0-alpha1.aar/178f18d806daf349657097f8ac9cb510/res/values-port/values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "/home/daniel/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.0.0-alpha1.aar/983e36a837fdf2ecf54bd34db5ab5fcd/res/values-port/values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+#Fri Dec 29 22:20:14 GMT 2017
+base.0=/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/transforms/dexMerger/debug/37
+renamed.0=classes.dex
+file.0=/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/transforms/dexMerger/debug/37/classes.dex
