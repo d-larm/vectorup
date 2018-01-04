@@ -1,4 +1,4 @@
-#Wed Nov 15 15:31:54 GMT 2017
-base.0=/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/transforms/dexMerger/debug/26
+#Thu Jan 04 01:27:30 GMT 2018
+base.0=C\:\\Users\\doubl\\Documents\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\45
+path.0=classes.dex
 renamed.0=classes.dex
-file.0=/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/transforms/dexMerger/debug/26/classes.dex

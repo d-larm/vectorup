@@ -1,10 +1,42 @@
 {
     "logs": [
         {
-            "outputFile": "/dcs/15/u1501624/AndroidStudioProjects/VectorMeUp/app/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-v24/values-v24.xml",
+            "outputFile": "C:\\Users\\doubl\\Documents\\vectorup\\app\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-v24\\values-v24.xml",
             "map": [
                 {
-                    "source": "/dcs/15/u1501624/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.0.0-alpha1.aar/178f18d806daf349657097f8ac9cb510/res/values-v24/values-v24.xml",
+                    "source": "C:\\Users\\doubl\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-26.1.0.aar\\124368b8bb2257f73b4f393eead1ebb7\\res\\values-v24\\values-v24.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7",
+                        "startColumns": "4,4,4,4,4,4",
+                        "startOffsets": "55,212,347,416,480,549",
+                        "endColumns": "156,134,68,63,68,69",
+                        "endOffsets": "207,342,411,475,544,614"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\doubl\\.gradle\\caches\\transforms-1\\files-1.1\\support-media-compat-26.1.0.aar\\a61e7ab42bf2c392ac2a5d5e981e2c50\\res\\values-v24\\values-v24.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,121,182,248",
+                        "endColumns": "65,60,65,66",
+                        "endOffsets": "116,177,243,310"
+                    },
+                    "to": {
+                        "startLines": "8,9,10,11",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "619,685,746,812",
+                        "endColumns": "65,60,65,66",
+                        "endOffsets": "680,741,807,874"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "C:\\dcs\\15\\u1501624\\AndroidStudioProjects\\VectorMeUp\\app\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-v24\\values-v24.xml",
+            "map": [
+                {
+                    "source": "C:\\dcs\\15\\u1501624\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-26.0.0-alpha1.aar\\178f18d806daf349657097f8ac9cb510\\res\\values-v24\\values-v24.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7",
                         "startColumns": "4,4,4,4,4,4",
@@ -16,10 +48,10 @@
             ]
         },
         {
-            "outputFile": "/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-v24/values-v24.xml",
+            "outputFile": "C:\\home\\daniel\\AndroidStudioProjects\\VectorMeUp\\app\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-v24\\values-v24.xml",
             "map": [
                 {
-                    "source": "/home/daniel/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.0.0-alpha1.aar/983e36a837fdf2ecf54bd34db5ab5fcd/res/values-v24/values-v24.xml",
+                    "source": "C:\\home\\daniel\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-26.0.0-alpha1.aar\\983e36a837fdf2ecf54bd34db5ab5fcd\\res\\values-v24\\values-v24.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7",
                         "startColumns": "4,4,4,4,4,4",

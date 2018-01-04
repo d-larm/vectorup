@@ -19,7 +19,7 @@ public class Tracer {
             @Override
             public Dir prev() {
                 return values()[values().length-1]; // see below for options for this line
-            };
+            }
         },
         AHEAD_RIGHT,RIGHT,BEHIND_RIGHT,BEHIND,BEHIND_LEFT,LEFT,
         AHEAD_LEFT
@@ -27,7 +27,7 @@ public class Tracer {
             @Override
             public Dir next() {
                 return values()[0]; // see below for options for this line
-            };
+            }
         };
         public Dir next(){
             return values()[ordinal()+1];
@@ -218,7 +218,7 @@ public class Tracer {
                     break;
                 }
             }
-        }while(canStart == false);
+        }while(!canStart);
     }
 
     public int getPixelX(int index){
@@ -318,6 +318,11 @@ public class Tracer {
 //        System.out.println("Added pixel with color "+activeColor+" at ("+x+","+y+")");
     }
 
+    private void eliminatePoints(Contour c){
+        if(c.getLastPixel().getType() == Pixel.Code.STRAIGHT && c.getPixel(c.size()-2).getType() == Pixel.Code.STRAIGHT)
+            c.remove(c.size()-2);
+    }
+
 
     public Contour trace(){
         int repeatTimes = 100;
@@ -385,8 +390,9 @@ public class Tracer {
                     //System.out.println("Found OUTER Pixel (Case 8)");
                 }
                 //System.out.println("Started at ("+getPixelX(startPixel)+","+getPixelY(startPixel)+")"+", currently at ("+x+","+y+")");
-                if(edge.size() > w*h/2)
+                if(edge.size() > w*h)
                     break;
+                eliminatePoints(edge);
             }while(currentIndex != startPixel);
         }
 

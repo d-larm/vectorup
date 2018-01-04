@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "/home/daniel/dcs/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-pl/values-pl.xml",
+            "outputFile": "C:\\Users\\doubl\\Documents\\vectorup\\aFileChooser\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-pl\\values-pl.xml",
             "map": [
                 {
-                    "source": "/home/daniel/dcs/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/bundles/debug/res/values-pl/values-pl.xml",
+                    "source": "C:\\Users\\doubl\\Documents\\vectorup\\aFileChooser\\build\\intermediates\\bundles\\debug\\res\\values-pl\\values-pl.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -16,10 +16,10 @@
             ]
         },
         {
-            "outputFile": "/dcs/15/u1501624/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-pl/values-pl.xml",
+            "outputFile": "C:\\dcs\\15\\u1501624\\AndroidStudioProjects\\VectorMeUp\\aFileChooser\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-pl\\values-pl.xml",
             "map": [
                 {
-                    "source": "/dcs/15/u1501624/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/bundles/debug/res/values-pl/values-pl.xml",
+                    "source": "C:\\dcs\\15\\u1501624\\AndroidStudioProjects\\VectorMeUp\\aFileChooser\\build\\intermediates\\bundles\\debug\\res\\values-pl\\values-pl.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -31,10 +31,25 @@
             ]
         },
         {
-            "outputFile": "/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-pl/values-pl.xml",
+            "outputFile": "C:\\home\\daniel\\dcs\\AndroidStudioProjects\\VectorMeUp\\aFileChooser\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-pl\\values-pl.xml",
             "map": [
                 {
-                    "source": "/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/build/intermediates/bundles/debug/res/values-pl/values-pl.xml",
+                    "source": "C:\\home\\daniel\\dcs\\AndroidStudioProjects\\VectorMeUp\\aFileChooser\\build\\intermediates\\bundles\\debug\\res\\values-pl\\values-pl.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,108,166,246",
+                        "endColumns": "52,57,79,84",
+                        "endOffsets": "103,161,241,326"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "C:\\home\\daniel\\AndroidStudioProjects\\VectorMeUp\\aFileChooser\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-pl\\values-pl.xml",
+            "map": [
+                {
+                    "source": "C:\\home\\daniel\\AndroidStudioProjects\\VectorMeUp\\aFileChooser\\build\\intermediates\\bundles\\debug\\res\\values-pl\\values-pl.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
