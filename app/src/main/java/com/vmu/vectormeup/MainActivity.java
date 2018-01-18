@@ -33,6 +33,7 @@ import android.app.Activity;
 import org.w3c.dom.Text;
 
 import com.vmu.vectormeup.trace.*;
+import android.graphics.Matrix;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -386,10 +387,9 @@ public class MainActivity extends AppCompatActivity {
 
         System.out.println("Drawing onto view");
         for(int i=0;i<map.length;i++){
-
             for(int j=0;j<edges[i].size();j++){
                 Pixel p = edges[i].getPixel(j);
-                pixels[p.getIndex(w)] = 255;
+                pixels[p.getIndex(w)] = p.getColor();
             }
         }
         System.out.println("Process complete");

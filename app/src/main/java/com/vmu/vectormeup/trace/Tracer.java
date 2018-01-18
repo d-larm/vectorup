@@ -159,6 +159,15 @@ public class Tracer {
         }
     }
 
+    private void setStart(int index) {
+        front = 0;
+        currentIndex = index;
+        startPixel = currentIndex;
+        x = getPixelX(currentIndex);
+        y = getPixelY(currentIndex);
+
+    }
+
 
     private void findStart(){
         Random rand = new Random();
@@ -219,6 +228,28 @@ public class Tracer {
                 }
             }
         }while(canStart == false);
+    }
+
+    private boolean startValid(int index) {
+        boolean canStart = false;
+        if(index < image.length){
+            if (getPixel(currentIndex) == activeColor) {
+                for (int i = 0; i < 4; i++) {
+                    if (getPixelAtDirection(Dir.BEHIND) != activeColor)
+                        if (getPixelAtDirection(Dir.LEFT) != activeColor) {
+                            if (getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor) {
+                                canStart = true;
+                                break;
+                            }
+                        } else {
+                            canStart = true;
+                            break;
+                        }
+                    changeDirection(Dir.RIGHT);
+                }
+            }
+        }
+        return canStart;
     }
 
     public int getPixelX(int index){
@@ -319,34 +350,107 @@ public class Tracer {
     }
 
 
-    public Contour trace(){
-        int repeatTimes = 100;
-        Contour edge = new Contour(activeColor);
-        for(int i=0;i<repeatTimes;i++){
-            int searchCount = 0;
-            boolean startFoundAlready = false;
-            do {
-//                System.out.println("Finding start");
-                startFoundAlready = false;
-                findStart();
-                if(edge.size() == 0)
-                    break;
-                for (int j = 0; j < edge.size(); j++) {
-                    if (startPixel == edge.getPixel(j).getIndex(w)){
-                        startFoundAlready = true;
-                        break;
-                    }
-                }
-                searchCount++;
-            }while(startFoundAlready == true && searchCount < edge.size());
+//    public Contour trace(){
+//        int repeatTimes = 100;
+//        Contour edge = new Contour(activeColor);
+//        for(int i=0;i<repeatTimes;i++){
+//            int searchCount = 0;
+//            boolean startFoundAlready = false;
+//            do {
+////                System.out.println("Finding start");
+//                startFoundAlready = false;
+//                findStart();
+//                if(edge.size() == 0)
+//                    break;
+//                for (int j = 0; j < edge.size(); j++) {
+//                    if (startPixel == edge.getPixel(j).getIndex(w)){
+//                        startFoundAlready = true;
+//                        break;
+//                    }
+//                }
+//                searchCount++;
+//            }while(startFoundAlready == true && searchCount < edge.size());
+//
+//            if(startFoundAlready == true)
+//                break;
+//            do{
+//                //Stage 1
+//                if(getPixelAtDirection(Dir.BEHIND_LEFT) == activeColor){ //Case 1
+//                    if(getPixelAtDirection(Dir.LEFT) == activeColor){
+//                        advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.INNER);
+//                        //System.out.println("Found INNER Pixel (Case 1)");
+//                    }
+//                    else{ //Case 2
+//                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.INNER_OUTER));
+//                        advanceTracer(edge,Dir.BEHIND_LEFT,Dir.BEHIND,Pixel.Code.INNER_OUTER);
+//                        //System.out.println("Found INNER-OUTER Pixel (Case 2)");
+//                    }
+//                }else{
+//                    if(getPixelAtDirection(Dir.LEFT) == activeColor){ //Case 3
+//                        advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.STRAIGHT);
+//                        //System.out.println("Found STRAIGHT Pixel (Case 3)");
+//                    }else{ //Case 4
+//                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.OUTER));
+//                        //System.out.println("Found OUTER Pixel (Case 4)");
+//                    }
+//                }
+//                //Stage 2
+//                if(getPixelAtDirection(Dir.AHEAD_LEFT) == activeColor) { //Case 6
+//                    if (getPixelAtDirection(Dir.AHEAD) == activeColor) {
+//                        advanceTracer(edge, Dir.AHEAD, Dir.LEFT, Pixel.Code.INNER);
+//                        moveTracer(Dir.AHEAD);
+//                        changeDirection(Dir.RIGHT);
+//                        //System.out.println("Found INNER Pixel (Case 6)");
+//                    } else { //Case 5
+//                        edge.addPixel(new Pixel(x, y, activeColor, Pixel.Code.INNER_OUTER));
+//                        advanceTracer(edge, Dir.AHEAD_LEFT, Dir.AHEAD, Pixel.Code.INNER_OUTER);
+//                        //System.out.println("Found INNER-OUTER Pixel (Case 5)");
+//                    }
+//                }else if(getPixelAtDirection(Dir.AHEAD) == activeColor){ //Case 7
+//                    moveTracer(Dir.AHEAD);
+//                    changeDirection(Dir.RIGHT);
+//                    //System.out.println("Case 7 (Move AHEAD and look RIGHT");
+//                }else { //Case 8
+//                    changeDirection(Dir.BEHIND);
+//                    edge.getLastPixel().setCode(Pixel.Code.OUTER);
+//                    //System.out.println("Found OUTER Pixel (Case 8)");
+//                }
+//                //System.out.println("Started at ("+getPixelX(startPixel)+","+getPixelY(startPixel)+")"+", currently at ("+x+","+y+")");
+//                if(edge.size() > w*h/2)
+//                    break;
+//            }while(currentIndex != startPixel);
+//        }
+//
+//        System.out.println("Trace complete");
+//        return edge;
+//    }
 
-            if(startFoundAlready == true)
-                break;
+    public Contour trace(){
+        Contour edge = new Contour(activeColor);
+        int sampleRate = 2;
+        for(int i=0;i<image.length;i+=sampleRate){ //Uses every pixel as the start pixel
+            setStart(i);
+            if(!startValid(i)) //If the start pixel is not valid go to next start pixel
+                continue;
+
+            boolean startFoundAlready = false;
+            for (int j = 0; j < edge.size(); j++) { //Checks if selected start pixel in edge list
+                if (startPixel == edge.getPixel(j).getIndex(w)){
+                    startFoundAlready = true;
+                    break;
+                }
+            }
+
+            if(startFoundAlready == true) //If the start pixel is already in the edge list then go to next start pixel
+                continue;
+
             do{
                 //Stage 1
                 if(getPixelAtDirection(Dir.BEHIND_LEFT) == activeColor){ //Case 1
                     if(getPixelAtDirection(Dir.LEFT) == activeColor){
                         advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.INNER);
+                        moveTracer(Dir.LEFT);
+                        changeDirection(Dir.LEFT);
                         //System.out.println("Found INNER Pixel (Case 1)");
                     }
                     else{ //Case 2
@@ -384,15 +488,19 @@ public class Tracer {
                     edge.getLastPixel().setCode(Pixel.Code.OUTER);
                     //System.out.println("Found OUTER Pixel (Case 8)");
                 }
-                //System.out.println("Started at ("+getPixelX(startPixel)+","+getPixelY(startPixel)+")"+", currently at ("+x+","+y+")");
-                if(edge.size() > w*h/2)
-                    break;
+//                System.out.println("Started at ("+getPixelX(startPixel)+","+getPixelY(startPixel)+")"+", currently at ("+x+","+y+")");
+//                if(edge.size() > w*h/4){
+//                    System.out.println("Start not found terminate");
+//                    break;
+//                }
+
             }while(currentIndex != startPixel);
         }
 
         System.out.println("Trace complete");
         return edge;
     }
+
 
 
 
