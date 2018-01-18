@@ -12,8 +12,8 @@ public final class R {
         public static final int use_provider = 0x7f030006;
     }
     public static final class dimen {
-        public static final int list_item_padding = 0x7f050053;
-        public static final int list_padding = 0x7f050054;
+        public static final int list_item_padding = 0x7f050058;
+        public static final int list_padding = 0x7f050059;
     }
     public static final class drawable {
         public static final int ic_chooser = 0x7f060054;
@@ -32,7 +32,7 @@ public final class R {
         public static final int storage_removed = 0x7f0b0028;
     }
     public static final class style {
-        public static final int fileChooserName = 0x7f0c0163;
+        public static final int fileChooserName = 0x7f0c0170;
     }
     public static final class xml {
         public static final int mimetypes = 0x7f0e0000;

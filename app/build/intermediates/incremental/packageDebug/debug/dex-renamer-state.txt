@@ -1,4 +1,19 @@
-#Fri Dec 29 22:20:14 GMT 2017
-base.0=/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/transforms/dexMerger/debug/37
+#Wed Jan 17 17:13:39 GMT 2018
+path.1=classes.dex
+path.0=classes.dex
+renamed.5=classes6.dex
+renamed.4=classes5.dex
+renamed.3=classes4.dex
+renamed.2=classes3.dex
+renamed.1=classes2.dex
 renamed.0=classes.dex
-file.0=/home/daniel/AndroidStudioProjects/VectorMeUp/app/build/intermediates/transforms/dexMerger/debug/37/classes.dex
+base.5=C\:\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\54
+base.4=C\:\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\51
+base.3=C\:\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\53
+base.2=C\:\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\50
+base.1=C\:\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\49
+base.0=C\:\\vectorup\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\52
+path.5=classes.dex
+path.4=classes.dex
+path.3=classes.dex
+path.2=classes.dex

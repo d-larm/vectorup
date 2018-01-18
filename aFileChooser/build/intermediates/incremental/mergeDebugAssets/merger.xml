@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/src/main/assets"/><source path="/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/build/generated/assets/shaders/debug"/></dataSet><dataSet config="debug"><source path="/home/daniel/AndroidStudioProjects/VectorMeUp/aFileChooser/src/debug/assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="C:\vectorup\aFileChooser\src\main\assets"/><source path="C:\vectorup\aFileChooser\build\generated\assets\shaders\debug"/></dataSet><dataSet config="debug"><source path="C:\vectorup\aFileChooser\src\debug\assets"/></dataSet></merger>
