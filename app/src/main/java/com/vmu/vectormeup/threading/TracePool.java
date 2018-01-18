@@ -18,7 +18,7 @@ public class TracePool {
     int w;
     int h;
     NeuQuant nq;
-    LinkedBlockingQueue<Runnable> traceQueue;
+    LinkedBlockingQueue<Runnable> traceQueue = new LinkedBlockingQueue<>(nq.getColorCount());
     ThreadPoolExecutor threadpool =
             new ThreadPoolExecutor(
                     //initial processor pool size
@@ -46,8 +46,9 @@ public class TracePool {
         int[] map = nq.getColorMap();
         for(int i=0;i<map.length;i++){
             TraceTask t = new TraceTask(image,map[i],w,h);
-            traceQueue.add(t);
+            threadpool.execute(t);
         }
+        threadpool.shutdown();
     }
 
 }

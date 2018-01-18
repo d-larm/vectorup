@@ -32,6 +32,7 @@ import android.app.Activity;
 
 import org.w3c.dom.Text;
 
+import com.vmu.vectormeup.threading.TracePool;
 import com.vmu.vectormeup.trace.*;
 import android.graphics.Matrix;
 
@@ -250,14 +251,15 @@ public class MainActivity extends AppCompatActivity {
                 }
 //                Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
 //                newImg.setPixels(pixels, 0, w, 0, 0, w, h);
-                TracerThread t = new TracerThread(pixels,v);
-                Thread thread2 = new Thread(t);
-                try {
-                    thread2.start();
-                    thread2.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                TracerThread t = new TracerThread(pixels,v);
+//                Thread thread2 = new Thread(t);
+//                try {
+//                    thread2.start();
+//                    thread2.join();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+                trace();
                 Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
                 newImg.setPixels(pixels, 0, w, 0, 0, w, h);
                 refreshCanvas(newImg);
@@ -366,6 +368,12 @@ public class MainActivity extends AppCompatActivity {
 //
 //        refreshCanvas(newImg);
     }
+
+    public void trace(){
+        TracePool tp = new TracePool(pixels,w,h,nq);
+        tp.traceImage();
+    }
+
     public void traceEdges(){
 
         System.out.println("Image size: "+w+" x "+h);
