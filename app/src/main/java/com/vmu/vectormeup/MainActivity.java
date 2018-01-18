@@ -367,6 +367,7 @@ public class MainActivity extends AppCompatActivity {
 //        refreshCanvas(newImg);
     }
     public void traceEdges(){
+
         System.out.println("Image size: "+w+" x "+h);
         int[] map = nq.getColorMap();
         Tracer tracer = new Tracer(pixels,w,h);
@@ -393,7 +394,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         System.out.println("Process complete");
-
     }
 
 }
