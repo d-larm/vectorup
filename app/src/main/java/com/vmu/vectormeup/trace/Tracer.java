@@ -233,7 +233,9 @@ public class Tracer {
     private boolean startValid(int index) {
         boolean canStart = false;
         if(index < image.length){
+//            System.out.println("Looking for "+activeColor+",found "+getPixel(currentIndex)+"for thread "+Thread.currentThread().getId());
             if (getPixel(currentIndex) == activeColor) {
+//                System.out.println("Landed on active for thread "+Thread.currentThread().getId());
                 for (int i = 0; i < 4; i++) {
                     if (getPixelAtDirection(Dir.BEHIND) != activeColor)
                         if (getPixelAtDirection(Dir.LEFT) != activeColor) {
@@ -426,9 +428,11 @@ public class Tracer {
 //    }
 
     public Contour trace(){
-        Contour edge = new Contour(activeColor);
+//        System.out.println("Thread begins");
+        Contour edge = new Contour(activeColor,w,h);
         int sampleRate = 2;
         for(int i=0;i<image.length;i+=sampleRate){ //Uses every pixel as the start pixel
+
             setStart(i);
             if(!startValid(i)) //If the start pixel is not valid go to next start pixel
                 continue;
@@ -445,6 +449,7 @@ public class Tracer {
                 continue;
 
             do{
+//                System.out.println("Contouring begins");
                 //Stage 1
                 if(getPixelAtDirection(Dir.BEHIND_LEFT) == activeColor){ //Case 1
                     if(getPixelAtDirection(Dir.LEFT) == activeColor){
@@ -497,7 +502,7 @@ public class Tracer {
             }while(currentIndex != startPixel);
         }
 
-        System.out.println("Trace complete");
+        System.out.println("Trace completed by thread "+Thread.currentThread().getId());
         return edge;
     }
 

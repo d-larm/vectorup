@@ -259,6 +259,10 @@ public class MainActivity extends AppCompatActivity {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
+//                for(int i=0;i<pixels.length;i++){
+//                    pixels[i] = -123;
+//                }
+
                 trace();
                 Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
                 newImg.setPixels(pixels, 0, w, 0, 0, w, h);
@@ -271,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 //                            Toast.LENGTH_LONG).show();
 //                }
                 Toast.makeText(v.getContext(),
-                        "Beginning Trace",
+                        "Width: "+w+" Height: "+h,
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -370,7 +374,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void trace(){
-        TracePool tp = new TracePool(pixels,w,h,nq);
+        int[] map = nq.getColorMap();
+        TracePool tp = new TracePool(pixels,w,h,map);
         tp.traceImage();
     }
 

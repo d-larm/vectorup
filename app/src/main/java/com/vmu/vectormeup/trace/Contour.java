@@ -19,6 +19,16 @@ public class Contour extends ArrayList<Pixel>{
         this.color = color;
     }
 
+    public Contour(int color,int width,int height){
+        super((width*height)/50);
+        this.color = color;
+    }
+
+    public Contour(int color,int size){
+        super(size);
+        this.color = color;
+    }
+
     public void addPixel(Pixel pixel){add(pixel);
     }
 

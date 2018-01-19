@@ -8,6 +8,7 @@ import com.vmu.vectormeup.trace.Contour;
 import com.vmu.vectormeup.trace.Pixel;
 import com.vmu.vectormeup.trace.Tracer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.xml.transform.Result;
@@ -22,15 +23,18 @@ public class TraceTask implements Runnable {
     int activeColor;
     int w;
     int h;
+    ArrayList<Contour> imageContours;
     Contour c;
 
 
-    public TraceTask( int[] image,int c,int w,int h) {
+    public TraceTask( int[] image,int c,int w,int h, ArrayList<Contour> e) {
         super();
         this.image = image;
         this.activeColor = c;
         this.w = w;
         this.h = h;
+        this.imageContours = e;
+
 
     }
 
@@ -40,21 +44,12 @@ public class TraceTask implements Runnable {
     }
 
     public void traceEdges(){
+        System.out.println("Thread "+Thread.currentThread().getId()+ " working on color "+activeColor);
         Tracer tracer = new Tracer(image,w,h,activeColor);
         c =  tracer.trace();
+        imageContours.add(c);
 
-        System.out.println("Finished trace");
 
-        for(int i=0;i<image.length;i++){
-            image[i] = -123;
-        }
 
-        System.out.println("Drawing onto view");
-        for(int i=0;i<c.size();i++){
-            Pixel p = c.getPixel(i);
-            image[p.getIndex(w)] = p.getColor();
-        }
-
-        System.out.println("Process complete");
     }
 }
