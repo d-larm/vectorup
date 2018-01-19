@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap image;
     private int[] pixels;
     private boolean busyQ = false;
+    private boolean busy = false;
     private boolean busyT = false;
     private int w = 0;
     private int h = 0;
@@ -240,15 +241,16 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                QuantiserThread q = new QuantiserThread(image,v);
-                Thread thread = new Thread(q);
-                try {
-                    thread.start();
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                if(!busy){
+                    busy = true;
+                    QuantiserThread q = new QuantiserThread(image,v);
+                    Thread thread = new Thread(q);
+                    try {
+                        thread.start();
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 //                Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
 //                newImg.setPixels(pixels, 0, w, 0, 0, w, h);
 //                TracerThread t = new TracerThread(pixels,v);
@@ -259,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-                trace();
-                Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
-                newImg.setPixels(pixels, 0, w, 0, 0, w, h);
-                refreshCanvas(newImg);
+                    trace();
+                    Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
+                    newImg.setPixels(pixels, 0, w, 0, 0, w, h);
+                    refreshCanvas(newImg);
 //                try {
 //                    set(image);
 //                } catch (IOException e) {
@@ -270,10 +272,15 @@ public class MainActivity extends AppCompatActivity {
 //                            "Error: Could not quantise color",
 //                            Toast.LENGTH_LONG).show();
 //                }
-                Toast.makeText(v.getContext(),
-                        "Beginning Trace",
-                        Toast.LENGTH_LONG).show();
+                    Toast.makeText(v.getContext(),
+                            "Beginning Trace",
+                            Toast.LENGTH_LONG).show();
+
+                    busy = false;
+                }
+
             }
+
         });
 
     }
