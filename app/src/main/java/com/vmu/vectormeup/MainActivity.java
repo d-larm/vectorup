@@ -1,6 +1,7 @@
 package com.vmu.vectormeup;
 
 import android.media.Image;
+import android.os.SystemClock;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private int h = 0;
     private NeuQuant nq;
     private Contour[] edges;
+    private TracePool tp = new TracePool();
+    private long mLastClickTime = 0;
 
     class QuantiserThread implements Runnable {
         Bitmap image;
@@ -237,12 +240,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button startButton = (Button) findViewById(R.id.startButton);
+
+        final Button startButton = (Button) findViewById(R.id.startButton);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!busy){
-                    busy = true;
+                if (SystemClock.elapsedRealtime() - mLastClickTime < 1500){
+                    return;
+                }
+                mLastClickTime = SystemClock.elapsedRealtime();
+                if(!tp.isBusy()){
+                    startButton.setEnabled(false);
                     QuantiserThread q = new QuantiserThread(image,v);
                     Thread thread = new Thread(q);
                     try {
@@ -261,24 +269,22 @@ public class MainActivity extends AppCompatActivity {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-                    trace();
                     Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
-                    newImg.setPixels(pixels, 0, w, 0, 0, w, h);
+                    tp.setStartButton(startButton);
+                    Canvas vectorCanvas = new Canvas(newImg);
+                    tp.setCanvas(vectorCanvas);
+                    trace();
+
+//                    newImg.setPixels(pixels, 0, w, 0, 0, w, h);
                     refreshCanvas(newImg);
-//                try {
-//                    set(image);
-//                } catch (IOException e) {
-//                    Toast.makeText(v.getContext(),
-//                            "Error: Could not quantise color",
-//                            Toast.LENGTH_LONG).show();
-//                }
+
                     Toast.makeText(v.getContext(),
-                            "Beginning Trace",
+                            "Finished on "+w+"x"+h+" image",
                             Toast.LENGTH_LONG).show();
-
-                    busy = false;
-                }
-
+                }else
+                    Toast.makeText(v.getContext(),
+                            "Currently Working. Please wait",
+                            Toast.LENGTH_LONG).show();
             }
 
         });
@@ -377,7 +383,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void trace(){
-        TracePool tp = new TracePool(pixels,w,h,nq);
+        int[] map = nq.getColorMap();
+        tp.setParams(pixels,w,h,map);
         tp.traceImage();
     }
 

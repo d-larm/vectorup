@@ -1,4 +1,6 @@
 package com.vmu.vectormeup.trace;
+import com.vmu.vectormeup.spline.SplineManager;
+
 import java.util.Random;
 
 /**
@@ -50,6 +52,7 @@ public class Tracer {
     private int searchedIndex;
     private int startPixel;
     private boolean backToStart = false;
+    private SplineManager splineManager;
 
     public Tracer(int[] image,int w,int h, int color){
         this.image = image;
@@ -67,6 +70,10 @@ public class Tracer {
 
     public void setActiveColor(int color){
         activeColor = color;
+    }
+
+    public void assignSplineManager(SplineManager sm){
+        splineManager = sm;
     }
 
     private int getPixelAtDirection(Dir dir){
@@ -347,90 +354,15 @@ public class Tracer {
     private void advanceTracer(Contour e, Dir p, Dir d, Pixel.Code code){
         moveTracer(p);
         changeDirection(d);
-        e.addPixel(new Pixel(x,y,activeColor, code));
+        e.addPixel(new Pixel(x,y,activeColor, code,getIndex(x,y)));
 //        System.out.println("Added pixel with color "+activeColor+" at ("+x+","+y+")");
     }
 
-
-//    public Contour trace(){
-//        int repeatTimes = 100;
-//        Contour edge = new Contour(activeColor);
-//        for(int i=0;i<repeatTimes;i++){
-//            int searchCount = 0;
-//            boolean startFoundAlready = false;
-//            do {
-////                System.out.println("Finding start");
-//                startFoundAlready = false;
-//                findStart();
-//                if(edge.size() == 0)
-//                    break;
-//                for (int j = 0; j < edge.size(); j++) {
-//                    if (startPixel == edge.getPixel(j).getIndex(w)){
-//                        startFoundAlready = true;
-//                        break;
-//                    }
-//                }
-//                searchCount++;
-//            }while(startFoundAlready == true && searchCount < edge.size());
-//
-//            if(startFoundAlready == true)
-//                break;
-//            do{
-//                //Stage 1
-//                if(getPixelAtDirection(Dir.BEHIND_LEFT) == activeColor){ //Case 1
-//                    if(getPixelAtDirection(Dir.LEFT) == activeColor){
-//                        advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.INNER);
-//                        //System.out.println("Found INNER Pixel (Case 1)");
-//                    }
-//                    else{ //Case 2
-//                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.INNER_OUTER));
-//                        advanceTracer(edge,Dir.BEHIND_LEFT,Dir.BEHIND,Pixel.Code.INNER_OUTER);
-//                        //System.out.println("Found INNER-OUTER Pixel (Case 2)");
-//                    }
-//                }else{
-//                    if(getPixelAtDirection(Dir.LEFT) == activeColor){ //Case 3
-//                        advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.STRAIGHT);
-//                        //System.out.println("Found STRAIGHT Pixel (Case 3)");
-//                    }else{ //Case 4
-//                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.OUTER));
-//                        //System.out.println("Found OUTER Pixel (Case 4)");
-//                    }
-//                }
-//                //Stage 2
-//                if(getPixelAtDirection(Dir.AHEAD_LEFT) == activeColor) { //Case 6
-//                    if (getPixelAtDirection(Dir.AHEAD) == activeColor) {
-//                        advanceTracer(edge, Dir.AHEAD, Dir.LEFT, Pixel.Code.INNER);
-//                        moveTracer(Dir.AHEAD);
-//                        changeDirection(Dir.RIGHT);
-//                        //System.out.println("Found INNER Pixel (Case 6)");
-//                    } else { //Case 5
-//                        edge.addPixel(new Pixel(x, y, activeColor, Pixel.Code.INNER_OUTER));
-//                        advanceTracer(edge, Dir.AHEAD_LEFT, Dir.AHEAD, Pixel.Code.INNER_OUTER);
-//                        //System.out.println("Found INNER-OUTER Pixel (Case 5)");
-//                    }
-//                }else if(getPixelAtDirection(Dir.AHEAD) == activeColor){ //Case 7
-//                    moveTracer(Dir.AHEAD);
-//                    changeDirection(Dir.RIGHT);
-//                    //System.out.println("Case 7 (Move AHEAD and look RIGHT");
-//                }else { //Case 8
-//                    changeDirection(Dir.BEHIND);
-//                    edge.getLastPixel().setCode(Pixel.Code.OUTER);
-//                    //System.out.println("Found OUTER Pixel (Case 8)");
-//                }
-//                //System.out.println("Started at ("+getPixelX(startPixel)+","+getPixelY(startPixel)+")"+", currently at ("+x+","+y+")");
-//                if(edge.size() > w*h/2)
-//                    break;
-//            }while(currentIndex != startPixel);
-//        }
-//
-//        System.out.println("Trace complete");
-//        return edge;
-//    }
-
     public Contour trace(){
-//        System.out.println("Thread begins");
         Contour edge = new Contour(activeColor,w,h);
         int sampleRate = 2;
+        int resolution = 8;
+        boolean initialisedStart = false;
         for(int i=0;i<image.length;i+=sampleRate){ //Uses every pixel as the start pixel
 
             setStart(i);
@@ -448,6 +380,11 @@ public class Tracer {
             if(startFoundAlready == true) //If the start pixel is already in the edge list then go to next start pixel
                 continue;
 
+            if(splineManager.canSetStart()){
+                splineManager.setStart(new Pixel(x,y,activeColor, Pixel.Code.INNER,getIndex(x,y)));
+            }
+
+
             do{
 //                System.out.println("Contouring begins");
                 //Stage 1
@@ -459,7 +396,7 @@ public class Tracer {
                         //System.out.println("Found INNER Pixel (Case 1)");
                     }
                     else{ //Case 2
-                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.INNER_OUTER));
+                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.INNER_OUTER,getIndex(x,y)));
                         advanceTracer(edge,Dir.BEHIND_LEFT,Dir.BEHIND,Pixel.Code.INNER_OUTER);
                         //System.out.println("Found INNER-OUTER Pixel (Case 2)");
                     }
@@ -468,7 +405,7 @@ public class Tracer {
                         advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.STRAIGHT);
                         //System.out.println("Found STRAIGHT Pixel (Case 3)");
                     }else{ //Case 4
-                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.OUTER));
+                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.OUTER,getIndex(x,y)));
                         //System.out.println("Found OUTER Pixel (Case 4)");
                     }
                 }
@@ -480,7 +417,7 @@ public class Tracer {
                         changeDirection(Dir.RIGHT);
                         //System.out.println("Found INNER Pixel (Case 6)");
                     } else { //Case 5
-                        edge.addPixel(new Pixel(x, y, activeColor, Pixel.Code.INNER_OUTER));
+                        edge.addPixel(new Pixel(x, y, activeColor, Pixel.Code.INNER_OUTER,getIndex(x,y)));
                         advanceTracer(edge, Dir.AHEAD_LEFT, Dir.AHEAD, Pixel.Code.INNER_OUTER);
                         //System.out.println("Found INNER-OUTER Pixel (Case 5)");
                     }
@@ -499,8 +436,18 @@ public class Tracer {
 //                    break;
 //                }
 
+//                if(edge.size() >= resolution){
+//                    splineManager.draw(edge); //Joins all the pixels found in the contour list
+//                    for(int k=0;k<edge.size()-1;k++) //Removes all but the most recently discovered pixel from the contour list
+//                        edge.remove(k);
+//                }
             }while(currentIndex != startPixel);
+            if(currentIndex == startPixel){
+                edge.add(new Pixel(x,y,activeColor, Pixel.Code.INNER,getIndex(x,y)));
+//                edge.clear();
+            }
         }
+        splineManager.draw(edge);
 
         System.out.println("Trace completed by thread "+Thread.currentThread().getId());
         return edge;

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.vmu.vectormeup.spline.SplineManager;
 import com.vmu.vectormeup.trace.Contour;
 import com.vmu.vectormeup.trace.Pixel;
 import com.vmu.vectormeup.trace.Tracer;
@@ -23,17 +24,19 @@ public class TraceTask implements Runnable {
     int activeColor;
     int w;
     int h;
+    SplineManager splineManager;
     ArrayList<Contour> imageContours;
     Contour c;
 
 
-    public TraceTask( int[] image,int c,int w,int h, ArrayList<Contour> e) {
+    public TraceTask( int[] image,int c,int w,int h, ArrayList<Contour> e,SplineManager sm) {
         super();
         this.image = image;
         this.activeColor = c;
         this.w = w;
         this.h = h;
         this.imageContours = e;
+        this.splineManager = sm;
 
 
     }
@@ -46,6 +49,7 @@ public class TraceTask implements Runnable {
     public void traceEdges(){
         System.out.println("Thread "+Thread.currentThread().getId()+ " working on color "+activeColor);
         Tracer tracer = new Tracer(image,w,h,activeColor);
+        tracer.assignSplineManager(splineManager);
         c =  tracer.trace();
         imageContours.add(c);
 

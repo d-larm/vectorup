@@ -12,6 +12,9 @@ public class Pixel {
     private int y;
     private Code type;
     private int color;
+    private float dx=0;
+    private float dy=0;
+    private int index;
 
     public Pixel(int x, int y){
         this.x = x;
@@ -34,6 +37,14 @@ public class Pixel {
         this.color = color;
     }
 
+    public Pixel(int x, int y, int color, Code type,int index){
+        this.x = x;
+        this.y = y;
+        this.type = type;
+        this.color = color;
+        this.index = index;
+    }
+
     public int getX(){
         return x;
     }
@@ -49,6 +60,8 @@ public class Pixel {
     public int getColor(){
         return color;
     }
+
+    public int getIndex(){ return index; }
 
     public int getIndex(int imgWidth) { return x + imgWidth*y; }
 
@@ -68,6 +81,18 @@ public class Pixel {
         this.y = y;
     }
 
+    public void setDifferentials(float dx,float dy){
+        this.dx = dx;
+        this.dy = dy;
+    }
+
+    public float getDx(){
+        return dx;
+    }
+
+    public float getDy(){
+        return dy;
+    }
 
 
     public void setPosition(int x, int y){
