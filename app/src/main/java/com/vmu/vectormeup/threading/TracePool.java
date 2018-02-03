@@ -2,6 +2,7 @@ package com.vmu.vectormeup.threading;
 
 import android.app.ProgressDialog;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.os.AsyncTask;
 import android.widget.Button;
@@ -33,6 +34,41 @@ public class TracePool {
     ThreadPoolExecutor threadpool;
     Canvas canvas;
     ArrayList<SPath> paths;
+
+    class UpdateThread implements Runnable{
+        int[] image;
+        Canvas canvas;
+        ArrayList<SPath> paths;
+        ArrayList<Contour> edges;
+
+
+        public UpdateThread(int[] img,ArrayList<Contour> e){
+            image = img;
+            edges = e;
+        }
+
+        public UpdateThread(Canvas c, ArrayList<SPath> p){
+            canvas = c;
+            paths = p;
+        }
+
+        public void run(){
+            for(int i=0;i<image.length;i++){
+                image[i] = -1;
+            }
+            for(int i=0;i<edges.size();i++){
+                for(int j=0;j<edges.get(i).size();j++){
+                    Pixel p = edges.get(i).getPixel(j);
+                    image[p.getIndex(w)] = p.getColor();
+                }
+            }
+//            for(int i=0;i<paths.size();i++){
+//                for(int j=0;j<paths.get(i).size();j++){
+//                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+//                }
+//            }
+        }
+    }
 
     public TracePool(int[] image,int w, int h, int[] map){
         this.image = image;
@@ -93,17 +129,23 @@ public class TracePool {
 
 
         for(int i=0;i<map.length;i++){
-            System.out.println(map[i]);
-            TraceTask t = new TraceTask(image,map[i],w,h,edges,new SplineManager(1000,canvas,paths));
-            threadpool.execute(t);
+            if(map[i] != Color.WHITE){
+                System.out.println(map[i]);
+                TraceTask t = new TraceTask(image,map[i],w,h,edges,new SplineManager(1000,canvas,paths));
+                threadpool.execute(t);
+            }
+
         }
 
         threadpool.shutdown();
 
         try {
             threadpool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+
+            UpdateThread u = new UpdateThread(image,edges);
+            u.run();
 //            for(int i=0;i<image.length;i++){
-//                image[i] = -123;
+//                image[i] = -1;
 //            }
 //            for(int i=0;i<edges.size();i++){
 //                for(int j=0;j<edges.get(i).size();j++){
@@ -111,11 +153,11 @@ public class TracePool {
 //                    image[p.getIndex(w)] = p.getColor();
 //                }
 //            }
-            for(int i=0;i<paths.size();i++){
-                for(int j=0;j<paths.get(i).size();j++){
-                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
-                }
-            }
+////            for(int i=0;i<paths.size();i++){
+////                for(int j=0;j<paths.get(i).size();j++){
+////                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+////                }
+////            }
             isBusy = false;
             System.out.println("Process complete");
             start.setEnabled(true);

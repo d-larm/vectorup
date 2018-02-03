@@ -127,7 +127,8 @@ public class NeuQuant {
 		maxnetpos  = netsize-1;
 		initrad	 = netsize/8;
 		initBiasRadius = initrad*radiusbias;
-		setUpArrays ();
+		if(netsize > 2)
+			setUpArrays ();
     }
     
     protected NeuQuant (int sample) throws IOException {
@@ -144,7 +145,8 @@ public class NeuQuant {
 		initrad	 = netsize/8;
 		initBiasRadius = initrad*radiusbias;
         setPixels (im, obs);
-		setUpArrays ();
+        if(netsize > 2)
+			setUpArrays ();
     }
 
     public int getColorCount () {
@@ -161,8 +163,14 @@ public class NeuQuant {
 
     public int[] getColorMap(){
     	int[] map = new int[netsize];
-    	for(int i=0;i<netsize;i++)
-    		map[i] = getColor(i);
+    	if(netsize > 2){
+			for(int i=0;i<netsize;i++)
+				map[i] = getColor(i);
+		}
+
+    	else {
+			map[0] = Color.WHITE; map[1] = Color.BLACK;
+		}
     	return map;
 
 	}
@@ -189,7 +197,7 @@ public class NeuQuant {
     	network [1] [2] = 255.0;
 		
     	// RESERVED bgColour	// background
-    	
+
         for (int i=0; i<specials; i++) {
 		    freq[i] = 1.0 / netsize;
 		    bias[i] = 0.0;
@@ -233,9 +241,12 @@ public class NeuQuant {
     
 
     public void init () {
-        learn ();
-        fix ();
-        inxbuild ();
+    	if(netsize > 2){
+			learn ();
+			fix ();
+			inxbuild ();
+		}
+
     }
 
     private void altersingle(double alpha, int i, double b, double g, double r) {
@@ -430,15 +441,22 @@ public class NeuQuant {
     }
 
     public int convert (int pixel) {
-        int alfa = (pixel >> 24) & 0xff;
-	    int r   = (pixel >> 16) & 0xff;
-	    int g = (pixel >>  8) & 0xff;
-	    int b  = (pixel      ) & 0xff;
-	    int i = inxsearch(b, g, r);
-	    int bb = colormap[i][0];
-	    int gg = colormap[i][1];
-	    int rr = colormap[i][2];
-	    return (alfa << 24) | (rr << 16) | (gg << 8) | (bb);
+    	if(netsize > 2){
+			int alfa = (pixel >> 24) & 0xff;
+			int r   = (pixel >> 16) & 0xff;
+			int g = (pixel >>  8) & 0xff;
+			int b  = (pixel      ) & 0xff;
+			int i = inxsearch(b, g, r);
+			int bb = colormap[i][0];
+			int gg = colormap[i][1];
+			int rr = colormap[i][2];
+			return (alfa << 24) | (rr << 16) | (gg << 8) | (bb);
+		}else{
+			if(Math.abs(Color.BLACK - pixel) < Math.abs(pixel - Color.WHITE))
+				return Color.BLACK;
+			else
+				return Color.WHITE;
+		}
     }
 
     public int lookup (int pixel) {

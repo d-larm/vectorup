@@ -1,6 +1,7 @@
 package com.vmu.vectormeup.trace;
 import com.vmu.vectormeup.spline.SplineManager;
 
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -15,6 +16,12 @@ public class Tracer {
         SOUTH EAST = 3      NORTH WEST = 7
 
      */
+//
+//    private int DIR = 0;
+//
+//    private int changeDir(int direction,int turnVal){
+//        return (((direction+turnVal)%8)+8)%8;
+//    }
 
     public enum Dir{
         AHEAD{
@@ -31,12 +38,33 @@ public class Tracer {
                 return values()[0]; // see below for options for this line
             };
         };
+        int size = values().length;
+        private Dir[] vals = values();
         public Dir next(){
             return values()[ordinal()+1];
         }
 
+        public Dir next2(){
+            int len = values().length;
+            return values()[(ordinal()+2)%len];
+        }
+
+        public Dir next4(){
+            int len = values().length;
+            return values()[(ordinal()+4)%len];
+        }
+
         public Dir prev(){
             return values()[ordinal()-1];
+        }
+        public Dir prev2(){
+            int len = values().length;
+            return values()[(((ordinal()-2)%len)+len)%len];
+        }
+
+        public Dir prev4(){
+            int len = values().length;
+            return values()[(((ordinal()-4)%len)+len)%len];
         }
     }
 
@@ -79,19 +107,29 @@ public class Tracer {
     private int getPixelAtDirection(Dir dir){
         int xPos = getPixelX(currentIndex);
         int yPos = getPixelY(currentIndex);
-        Dir relativePos;
+//        if(front == 0) //NORTH
+//            relativePos = dir; //Directions not shifted
+//        else if(front == 1) //EAST
+//            relativePos = dir.next().next(); //Directions shifted eastwards (ahead becomes right)
+//        else if(front == 2) //SOUTH
+//             relativePos = dir.next().next().next().next(); //Directions shifted southwards (ahead becomes behind)
+//        else if(front == 3) //WEST
+//            relativePos = dir.prev().prev();//Directions shifted westwards (ahead becomes left)
+//        else
+//            return -1;
+
         if(front == 0) //NORTH
-            relativePos = dir; //Directions not shifted
+            dir = dir; //Directions not shifted
         else if(front == 1) //EAST
-            relativePos = dir.next().next(); //Directions shifted eastwards (ahead becomes right)
+            dir = dir.next2(); //Directions shifted eastwards (ahead becomes right)
         else if(front == 2) //SOUTH
-            relativePos = dir.next().next().next().next(); //Directions shifted southwards (ahead becomes behind)
+            dir = dir.next4(); //Directions shifted southwards (ahead becomes behind)
         else if(front == 3) //WEST
-            relativePos = dir.prev().prev();//Directions shifted westwards (ahead becomes left)
+            dir = dir.prev2();//Directions shifted westwards (ahead becomes left)
         else
             return -1;
 
-        switch(relativePos) {
+        switch(dir) {
             case AHEAD: //get pixel ahead
                 if (yPos > 0)
                     searchedIndex = getIndex(xPos, yPos - 1);
@@ -278,21 +316,22 @@ public class Tracer {
     }
 
     private void moveTracer(Dir dir){
-        int xPos = getPixelX(currentIndex);
-        int yPos = getPixelY(currentIndex);
-        Dir relativePos = dir;
-
-        if(front == 1)
-            relativePos = dir.next().next();
-        else if(front == 2)
-            relativePos = dir.next().next().next().next();
-        else if(front == 3)
-            relativePos = dir.prev().prev();
-
         if(dir == null)
             return;
 
-        switch(relativePos) {
+        int xPos = getPixelX(currentIndex);
+        int yPos = getPixelY(currentIndex);
+
+
+
+        if(front == 1) //EAST
+            dir = dir.next2(); //Directions shifted eastwards (ahead becomes right)
+        else if(front == 2) //SOUTH
+            dir = dir.next4(); //Directions shifted southwards (ahead becomes behind)
+        else if(front == 3) //WEST
+            dir = dir.prev2();//Directions shifted westwards (ahead becomes left)
+
+        switch(dir) {
             case AHEAD: //get pixel ahead
                 if (yPos > 0)
                     searchedIndex = getIndex(xPos, yPos - 1);
@@ -350,17 +389,19 @@ public class Tracer {
         }
 
     }
-
+    HashSet<Integer> foundPixels = new HashSet<Integer>(w*h);
     private void advanceTracer(Contour e, Dir p, Dir d, Pixel.Code code){
         moveTracer(p);
         changeDirection(d);
         e.addPixel(new Pixel(x,y,activeColor, code,getIndex(x,y)));
+        foundPixels.add(getIndex(x,y));
+
 //        System.out.println("Added pixel with color "+activeColor+" at ("+x+","+y+")");
     }
 
     public Contour trace(){
-        Contour edge = new Contour(activeColor,w,h);
-        int sampleRate = 2;
+        Contour edge = new Contour(activeColor,w*h);
+        int sampleRate = 1;
         int resolution = 8;
         boolean initialisedStart = false;
         for(int i=0;i<image.length;i+=sampleRate){ //Uses every pixel as the start pixel
@@ -370,12 +411,14 @@ public class Tracer {
                 continue;
 
             boolean startFoundAlready = false;
-            for (int j = 0; j < edge.size(); j++) { //Checks if selected start pixel in edge list
-                if (startPixel == edge.getPixel(j).getIndex(w)){
-                    startFoundAlready = true;
-                    break;
-                }
-            }
+//            for (int j = 0; j < edge.size(); j++) { //Checks if selected start pixel in edge list
+//                if (startPixel == edge.getPixel(j).getIndex(w)){
+//                    startFoundAlready = true;
+//                    break;
+//                }
+//            }
+            if(foundPixels.contains(startPixel))
+                startFoundAlready = true;
 
             if(startFoundAlready == true) //If the start pixel is already in the edge list then go to next start pixel
                 continue;
@@ -406,6 +449,7 @@ public class Tracer {
                         //System.out.println("Found STRAIGHT Pixel (Case 3)");
                     }else{ //Case 4
                         edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.OUTER,getIndex(x,y)));
+                        foundPixels.add(getIndex(x,y));
                         //System.out.println("Found OUTER Pixel (Case 4)");
                     }
                 }
@@ -418,6 +462,7 @@ public class Tracer {
                         //System.out.println("Found INNER Pixel (Case 6)");
                     } else { //Case 5
                         edge.addPixel(new Pixel(x, y, activeColor, Pixel.Code.INNER_OUTER,getIndex(x,y)));
+                        foundPixels.add(getIndex(x,y));
                         advanceTracer(edge, Dir.AHEAD_LEFT, Dir.AHEAD, Pixel.Code.INNER_OUTER);
                         //System.out.println("Found INNER-OUTER Pixel (Case 5)");
                     }
@@ -428,14 +473,9 @@ public class Tracer {
                 }else { //Case 8
                     changeDirection(Dir.BEHIND);
                     edge.getLastPixel().setCode(Pixel.Code.OUTER);
+
                     //System.out.println("Found OUTER Pixel (Case 8)");
                 }
-//                System.out.println("Started at ("+getPixelX(startPixel)+","+getPixelY(startPixel)+")"+", currently at ("+x+","+y+")");
-//                if(edge.size() > w*h/4){
-//                    System.out.println("Start not found terminate");
-//                    break;
-//                }
-
 //                if(edge.size() >= resolution){
 //                    splineManager.draw(edge); //Joins all the pixels found in the contour list
 //                    for(int k=0;k<edge.size()-1;k++) //Removes all but the most recently discovered pixel from the contour list
@@ -444,10 +484,11 @@ public class Tracer {
             }while(currentIndex != startPixel);
             if(currentIndex == startPixel){
                 edge.add(new Pixel(x,y,activeColor, Pixel.Code.INNER,getIndex(x,y)));
+                foundPixels.add(getIndex(x,y));
 //                edge.clear();
             }
         }
-        splineManager.draw(edge);
+//        splineManager.draw(edge);
 
         System.out.println("Trace completed by thread "+Thread.currentThread().getId());
         return edge;

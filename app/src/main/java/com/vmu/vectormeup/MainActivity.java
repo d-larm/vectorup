@@ -56,6 +56,19 @@ public class MainActivity extends AppCompatActivity {
     private TracePool tp = new TracePool();
     private long mLastClickTime = 0;
 
+    class ImageUpdaterThread implements Runnable {
+        private int[] pixels;
+        private Bitmap image;
+        public ImageUpdaterThread(int[] p,Bitmap img) {
+            image = img;
+            pixels = p;
+        }
+
+        public void run() {
+            image.setPixels(pixels, 0, w, 0, 0, w, h);
+        }
+    }
+
     class QuantiserThread implements Runnable {
         Bitmap image;
         View v;
@@ -249,8 +262,8 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 mLastClickTime = SystemClock.elapsedRealtime();
-                if(!tp.isBusy()){
-                    startButton.setEnabled(false);
+//                if(!tp.isBusy()){
+//                    startButton.setEnabled(false);
                     QuantiserThread q = new QuantiserThread(image,v);
                     Thread thread = new Thread(q);
                     try {
@@ -261,30 +274,31 @@ public class MainActivity extends AppCompatActivity {
                     }
 //                Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
 //                newImg.setPixels(pixels, 0, w, 0, 0, w, h);
-//                TracerThread t = new TracerThread(pixels,v);
-//                Thread thread2 = new Thread(t);
-//                try {
-//                    thread2.start();
-//                    thread2.join();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+////                TracerThread t = new TracerThread(pixels,v);
+////                Thread thread2 = new Thread(t);
+////                try {
+////                    thread2.start();
+////                    thread2.join();
+////                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+////                }
                     Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
+
                     tp.setStartButton(startButton);
                     Canvas vectorCanvas = new Canvas(newImg);
                     tp.setCanvas(vectorCanvas);
                     trace();
+                    new Thread(new ImageUpdaterThread(pixels,newImg)).start();
 
-//                    newImg.setPixels(pixels, 0, w, 0, 0, w, h);
                     refreshCanvas(newImg);
 
                     Toast.makeText(v.getContext(),
                             "Finished on "+w+"x"+h+" image",
                             Toast.LENGTH_LONG).show();
-                }else
-                    Toast.makeText(v.getContext(),
-                            "Currently Working. Please wait",
-                            Toast.LENGTH_LONG).show();
+//                }else
+//                    Toast.makeText(v.getContext(),
+//                            "Currently Working. Please wait",
+//                            Toast.LENGTH_LONG).show();
             }
 
         });

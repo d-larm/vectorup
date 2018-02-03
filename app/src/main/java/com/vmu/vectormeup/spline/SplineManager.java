@@ -57,10 +57,9 @@ public class SplineManager {
         paint.setColor(pixels.getColor());
         paint.setStrokeWidth(2);
 
-        paint.setStyle(Paint.Style.FILL);
+        paint.setStyle(Paint.Style.STROKE);
 //        System.out.println("Contour of size " + pixels.size() + "for thread "+Thread.currentThread().getId());
         if(pixels.size() > 1){
-
             for(int i = pixels.size() - 2; i < pixels.size(); i++){
                 if(i >= 0){
                     Pixel pixel = pixels.get(i);
@@ -85,15 +84,7 @@ public class SplineManager {
         boolean first = true;
         for(int i = 0; i < pixels.size(); i++){
             Pixel pixel = pixels.get(i);
-            if(first){
-                first = false;
-                currentPath.moveTo(pixel.getX(), pixel.getY());
-            }
-            else{
-                Pixel prev = pixels.get(i - 1);
-                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
-            }
-            if(pixel.getIndex() == startPixel.getIndex()){
+            if(pixel.getIndex() == startPixel.getIndex() && !first){
                 currentPath.close();
                 edgePath.add(currentPath);
 //                canvas.drawPath(currentPath, paint);
@@ -105,10 +96,16 @@ public class SplineManager {
                     i++;
                 }
             }
+            if(first){
+                first = false;
+                currentPath.moveTo(pixel.getX(), pixel.getY());
+            }
+            else{
+                Pixel prev = pixels.get(i - 1);
+                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
+            }
         }
         paths.add(edgePath);
-//        canvas.drawPath(currentPath, paint);
-//        System.out.println("Drawing path on thread "+Thread.currentThread().getId());
     }
 
     public boolean canSetStart(){
