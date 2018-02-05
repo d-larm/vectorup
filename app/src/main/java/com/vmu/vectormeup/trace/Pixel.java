@@ -5,9 +5,7 @@ package com.vmu.vectormeup.trace;
  */
 
 public class Pixel {
-//    public enum Code{
-//        INNER,OUTER,INNER_OUTER,STRAIGHT
-//    }
+
     private int x;
     private int y;
     private int type = -1;
@@ -15,6 +13,8 @@ public class Pixel {
     private float dx=0;
     private float dy=0;
     private int index;
+    private boolean isStart = false;
+
 
     public Pixel(int x, int y){
         this.x = x;
@@ -96,5 +96,18 @@ public class Pixel {
     public void setPosition(int x, int y){
         setX(x);
         setY(y);
+    }
+
+    public void setAsStart(){
+        isStart = true;
+    }
+
+    public boolean isStart(){
+        return isStart;
+    }
+
+    @Override
+    public int hashCode() {
+        return index;
     }
 }

@@ -7,8 +7,11 @@ import android.graphics.Path;
 
 import com.vmu.vectormeup.trace.Contour;
 import com.vmu.vectormeup.trace.Pixel;
+import com.vmu.vectormeup.trace.PixelHashSet;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Created by Daniel on 20/01/2018.
@@ -113,6 +116,101 @@ public class SplineManager {
                 Pixel prev = pixels.get(i - 1);
                 currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
             }
+        }
+        paths.add(edgePath);
+    }
+
+
+    public void draw(PixelHashSet pixels) {
+        paint.setColor(pixels.getColor());
+        paint.setStrokeWidth(2);
+
+        paint.setStyle(Paint.Style.STROKE);
+        Pixel currentPixel = startPixel;
+        int pixelCount = pixels.size();
+        Iterator<Pixel> p;
+        Pixel prev = null;
+        Pixel next = null;
+        int i=0;
+//        System.out.println("Contour of size " + pixels.size() + "for thread "+Thread.currentThread().getId());
+        if(pixelCount > 1){
+
+
+            for(p = pixels.iterator();p.hasNext();){
+                Pixel pixel = p.next();
+                if(i == 0){
+                    next = p.next();
+                    pixel.setDifferentials(((next.getX() - pixel.getX()) / 3), ((next.getY() - pixel.getY()) / 3));
+                    prev = pixel;
+                    i++;
+                }
+                if(!p.hasNext()){
+                    pixel = next;
+                    pixel.setDifferentials(((pixel.getX() - prev.getX()) / 3),((pixel.getY() - prev.getY()) / 3));
+                    break;
+                }
+                if(prev != null && p.hasNext()){
+                    prev = pixel;
+                    pixel = next;
+                    next = p.next();
+                    pixel.setDifferentials(((next.getX() - prev.getX()) / 3),((next.getY() - prev.getY()) / 3));
+                    i++;
+                }
+            }
+        }
+        i=0;
+        next = null;
+        prev = null;
+        for(p = pixels.iterator();p.hasNext();) {
+            Pixel pixel = p.next();
+            if (prev != null && pixel.isStart()) {
+                currentPath.close();
+                edgePath.add(currentPath);
+                currentPath = new Path();
+                if (p.hasNext()) {
+                    prev = pixel;
+                    pixel = next;
+                    next = p.next();
+                    currentPath.moveTo(pixel.getX(), pixel.getY());
+                    i++;
+                }
+            }
+            if (prev == null)
+                currentPath.moveTo(currentPixel.getX(), currentPixel.getY());
+            else
+                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
+
+            currentPixel = currentPixel.nextPixel;
+            i++;
+        }
+
+
+        int i=0;
+        currentPixel = startPixel;
+
+        while(currentPixel != null){
+            if(i!=0 && currentPixel.isStart()){
+                currentPath.close();
+                edgePath.add(currentPath);
+                currentPath = new Path();
+                if(currentPixel.nextPixel != null) {
+                    paint.setColor(Color.WHITE);
+                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
+                    currentPixel = currentPixel.nextPixel;
+                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
+                    currentPath.moveTo(startPixel.getX(),startPixel.getY());
+                    i++;
+                    paint.setColor(pixels.getColor());
+                }
+            }
+
+            if(i==0)
+                currentPath.moveTo(currentPixel.getX(), currentPixel.getY());
+            else
+                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
+
+            currentPixel = currentPixel.nextPixel;
+            i++;
         }
         paths.add(edgePath);
     }
