@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                     Canvas vectorCanvas = new Canvas(newImg);
                     tp.setCanvas(vectorCanvas);
                     trace();
-                    new Thread(new ImageUpdaterThread(pixels,newImg)).start();
+//                    new Thread(new ImageUpdaterThread(pixels,newImg)).start();
 
                     refreshCanvas(newImg);
 

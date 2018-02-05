@@ -16,12 +16,25 @@ public class Tracer {
         SOUTH EAST = 3      NORTH WEST = 7
 
      */
-//
-//    private int DIR = 0;
-//
-//    private int changeDir(int direction,int turnVal){
-//        return (((direction+turnVal)%8)+8)%8;
-//    }
+    private final int AHEAD = 0;
+    private final int AHEAD_RIGHT = 1;
+    private final int RIGHT = 2;
+    private final int BEHIND_RIGHT = 3;
+    private final int BEHIND = 4;
+    private final int BEHIND_LEFT = 5;
+    private final int LEFT = 6;
+    private final int AHEAD_LEFT = 7;
+
+
+    private final int INNER = 0;
+    private final int OUTER = 1;
+    private final int INNER_OUTER = 2;
+    private final int STRAIGHT = 3;
+
+
+    private int changeDir(int direction,int turnVal){
+        return (((direction+turnVal)%8)+8)%8;
+    }
 
     public enum Dir{
         AHEAD{
@@ -191,7 +204,107 @@ public class Tracer {
             return Integer.MAX_VALUE;
     }
 
+    private int getPixelAtDirection(int dir){
+        int xPos = getPixelX(currentIndex);
+        int yPos = getPixelY(currentIndex);
+//        if(front == 0) //NORTH
+//            relativePos = dir; //Directions not shifted
+//        else if(front == 1) //EAST
+//            relativePos = dir.next().next(); //Directions shifted eastwards (ahead becomes right)
+//        else if(front == 2) //SOUTH
+//             relativePos = dir.next().next().next().next(); //Directions shifted southwards (ahead becomes behind)
+//        else if(front == 3) //WEST
+//            relativePos = dir.prev().prev();//Directions shifted westwards (ahead becomes left)
+//        else
+//            return -1;
+
+        if(front == 0) //NORTH
+            dir = dir; //Directions not shifted
+        else if(front == 1) //EAST
+            dir = changeDir(dir,2); //Directions shifted eastwards (ahead becomes right)
+        else if(front == 2) //SOUTH
+            dir = changeDir(dir,4); //Directions shifted southwards (ahead becomes behind)
+        else if(front == 3) //WEST
+            dir = changeDir(dir,-2);//Directions shifted westwards (ahead becomes left)
+        else
+            return -1;
+
+        switch(dir) {
+            case AHEAD: //get pixel ahead
+                if (yPos > 0)
+                    searchedIndex = getIndex(xPos, yPos - 1);
+                else
+                    searchedIndex = -1;
+                break;
+            case AHEAD_RIGHT: //get pixel ahead and right
+                if (yPos > 0 && xPos < w-1)
+                    searchedIndex = getIndex(xPos + 1, yPos - 1);
+                else
+                    searchedIndex = -1;
+                break;
+            case RIGHT: //get pixel to the right
+                if (xPos < w-1)
+                    searchedIndex = getIndex(xPos + 1, yPos);
+                else
+                    searchedIndex = -1;
+                break;
+            case BEHIND_RIGHT: //get pixel behind and right
+                if (xPos < w-1 && yPos < h-1)
+                    searchedIndex = getIndex(xPos + 1, yPos + 1);
+                else
+                    searchedIndex = -1;
+                break;
+            case BEHIND: //get pixel behind
+                if (yPos < h-1)
+                    searchedIndex = getIndex(xPos, yPos + 1);
+                else
+                    searchedIndex = -1;
+                break;
+            case BEHIND_LEFT: //get pixel behind and left
+                if (xPos > 0 && yPos < h-1)
+                    searchedIndex = getIndex(xPos - 1, yPos + 1);
+                else
+                    searchedIndex = -1;
+                break;
+            case LEFT: //get pixel to the left
+                if (xPos > 0)
+                    searchedIndex = getIndex(xPos - 1, yPos);
+                else
+                    searchedIndex = -1;
+                break;
+            case AHEAD_LEFT: //get pixel ahead and left
+                if (xPos > 0 && yPos > 0)
+                    searchedIndex = getIndex(xPos - 1, yPos - 1);
+                else
+                    searchedIndex = -1;
+                break;
+        }
+        if(searchedIndex != -1){
+//            //System.out.println("Scanned color: "+image[searchedIndex]+ ", active color: "+activeColor);
+            if(searchedIndex < 0 || searchedIndex > image.length-1)
+                return Integer.MAX_VALUE;
+            else
+                return image[searchedIndex];
+        }
+
+        else
+            return Integer.MAX_VALUE;
+    }
+
     private void changeDirection(Dir newDir){ //Sets the absolute direction of the tracer using a relative direction
+        switch(newDir){
+            case LEFT:
+                front = (front-1 % 4 + 4) % 4;break;
+            case RIGHT:
+                front = (front+1 % 4 + 4) % 4;break;
+            case BEHIND:
+                front = (front+2 % 4 + 4) % 4;break;
+            default:
+                break;
+        }
+    }
+
+    private void changeDirection(int newDir){ //Sets the absolute direction of the tracer using a relative direction
         switch(newDir){
             case LEFT:
                 front = (front-1 % 4 + 4) % 4;break;
@@ -213,6 +326,67 @@ public class Tracer {
 
     }
 
+//
+//    private void findStart(){
+//        Random rand = new Random();
+//        boolean canStart;
+//        int maxSearch = w*h/4;
+//        int searchCount = 0;
+//        do{
+//            searchCount++;
+//            canStart = false;
+//            front = 0;
+//            currentIndex = rand.nextInt(image.length);
+//            startPixel = currentIndex;
+//            x = getPixelX(currentIndex);
+//            y = getPixelY(currentIndex);
+////            System.out.println("Looking at ("+x+","+y+") for start position");
+//            if(getPixel(currentIndex) == activeColor){
+//                for(int i=0;i<4;i++){
+//                    if(getPixelAtDirection(BEHIND) != activeColor)
+//                        if(getPixelAtDirection(Dir.LEFT) != activeColor){
+//                            if(getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor){
+//                                canStart = true;
+//                                //System.out.println("Found start position");
+//                                break;
+//                            }
+//                        }else{
+//                            //System.out.println("Found start position");
+//                            canStart = true;
+//                            break;
+//                        }
+//                    changeDirection(Dir.RIGHT);
+//                }
+//            }else{
+//                if(searchCount >= maxSearch){
+//                    for(int k=0;k<image.length;k++){
+//                        currentIndex = k;
+//                        startPixel = currentIndex;
+//                        x = getPixelX(currentIndex);
+//                        y = getPixelY(currentIndex);
+//                        if(getPixel(currentIndex) == activeColor) {
+//                            for (int i = 0; i < 4; i++) {
+//                                if (getPixelAtDirection(Dir.BEHIND) != activeColor)
+//                                    if (getPixelAtDirection(Dir.LEFT) != activeColor) {
+//                                        if (getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor) {
+//                                            canStart = true;
+//                                            //System.out.println("Found start position");
+//                                            break;
+//                                        }
+//                                    } else {
+//                                        //System.out.println("Found start position");
+//                                        canStart = true;
+//                                        break;
+//                                    }
+//                                changeDirection(Dir.RIGHT);
+//                            }
+//                        }
+//                    }
+//                    break;
+//                }
+//            }
+//        }while(canStart == false);
+//    }
 
     private void findStart(){
         Random rand = new Random();
@@ -230,9 +404,9 @@ public class Tracer {
 //            System.out.println("Looking at ("+x+","+y+") for start position");
             if(getPixel(currentIndex) == activeColor){
                 for(int i=0;i<4;i++){
-                    if(getPixelAtDirection(Dir.BEHIND) != activeColor)
-                        if(getPixelAtDirection(Dir.LEFT) != activeColor){
-                            if(getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor){
+                    if(getPixelAtDirection(BEHIND) != activeColor)
+                        if(getPixelAtDirection(LEFT) != activeColor){
+                            if(getPixelAtDirection(BEHIND_LEFT) != activeColor){
                                 canStart = true;
                                 //System.out.println("Found start position");
                                 break;
@@ -242,7 +416,7 @@ public class Tracer {
                             canStart = true;
                             break;
                         }
-                    changeDirection(Dir.RIGHT);
+                    changeDirection(RIGHT);
                 }
             }else{
                 if(searchCount >= maxSearch){
@@ -253,9 +427,9 @@ public class Tracer {
                         y = getPixelY(currentIndex);
                         if(getPixel(currentIndex) == activeColor) {
                             for (int i = 0; i < 4; i++) {
-                                if (getPixelAtDirection(Dir.BEHIND) != activeColor)
-                                    if (getPixelAtDirection(Dir.LEFT) != activeColor) {
-                                        if (getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor) {
+                                if (getPixelAtDirection(BEHIND) != activeColor)
+                                    if (getPixelAtDirection(LEFT) != activeColor) {
+                                        if (getPixelAtDirection(BEHIND_LEFT) != activeColor) {
                                             canStart = true;
                                             //System.out.println("Found start position");
                                             break;
@@ -265,7 +439,7 @@ public class Tracer {
                                         canStart = true;
                                         break;
                                     }
-                                changeDirection(Dir.RIGHT);
+                                changeDirection(RIGHT);
                             }
                         }
                     }
@@ -282,9 +456,9 @@ public class Tracer {
             if (getPixel(currentIndex) == activeColor) {
 //                System.out.println("Landed on active for thread "+Thread.currentThread().getId());
                 for (int i = 0; i < 4; i++) {
-                    if (getPixelAtDirection(Dir.BEHIND) != activeColor)
-                        if (getPixelAtDirection(Dir.LEFT) != activeColor) {
-                            if (getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor) {
+                    if (getPixelAtDirection(BEHIND) != activeColor)
+                        if (getPixelAtDirection(LEFT) != activeColor) {
+                            if (getPixelAtDirection(BEHIND_LEFT) != activeColor) {
                                 canStart = true;
                                 break;
                             }
@@ -292,7 +466,7 @@ public class Tracer {
                             canStart = true;
                             break;
                         }
-                    changeDirection(Dir.RIGHT);
+                    changeDirection(RIGHT);
                 }
             }
         }
@@ -315,21 +489,18 @@ public class Tracer {
         return x + w*y;
     }
 
-    private void moveTracer(Dir dir){
-        if(dir == null)
-            return;
-
+    private void moveTracer(int dir){
         int xPos = getPixelX(currentIndex);
         int yPos = getPixelY(currentIndex);
 
 
 
         if(front == 1) //EAST
-            dir = dir.next2(); //Directions shifted eastwards (ahead becomes right)
+            dir = changeDir(dir,2); //Directions shifted eastwards (ahead becomes right)
         else if(front == 2) //SOUTH
-            dir = dir.next4(); //Directions shifted southwards (ahead becomes behind)
+            dir = changeDir(dir,4); //Directions shifted southwards (ahead becomes behind)
         else if(front == 3) //WEST
-            dir = dir.prev2();//Directions shifted westwards (ahead becomes left)
+            dir = changeDir(dir,-2);//Directions shifted westwards (ahead becomes left)
 
         switch(dir) {
             case AHEAD: //get pixel ahead
@@ -390,7 +561,7 @@ public class Tracer {
 
     }
     HashSet<Integer> foundPixels = new HashSet<Integer>(w*h);
-    private void advanceTracer(Contour e, Dir p, Dir d, Pixel.Code code){
+    private void advanceTracer(Contour e, int p, int d,int code){
         moveTracer(p);
         changeDirection(d);
         e.addPixel(new Pixel(x,y,activeColor, code,getIndex(x,y)));
@@ -424,55 +595,55 @@ public class Tracer {
                 continue;
 
             if(splineManager.canSetStart()){
-                splineManager.setStart(new Pixel(x,y,activeColor, Pixel.Code.INNER,getIndex(x,y)));
+                splineManager.setStart(new Pixel(x,y,activeColor, INNER,getIndex(x,y)));
             }
 
 
             do{
 //                System.out.println("Contouring begins");
                 //Stage 1
-                if(getPixelAtDirection(Dir.BEHIND_LEFT) == activeColor){ //Case 1
-                    if(getPixelAtDirection(Dir.LEFT) == activeColor){
-                        advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.INNER);
-                        moveTracer(Dir.LEFT);
-                        changeDirection(Dir.LEFT);
+                if(getPixelAtDirection(BEHIND_LEFT) == activeColor){ //Case 1
+                    if(getPixelAtDirection(LEFT) == activeColor){
+                        advanceTracer(edge,LEFT,LEFT,INNER);
+                        moveTracer(LEFT);
+                        changeDirection(LEFT);
                         //System.out.println("Found INNER Pixel (Case 1)");
                     }
                     else{ //Case 2
-                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.INNER_OUTER,getIndex(x,y)));
-                        advanceTracer(edge,Dir.BEHIND_LEFT,Dir.BEHIND,Pixel.Code.INNER_OUTER);
+                        edge.addPixel(new Pixel(x,y,activeColor, INNER_OUTER,getIndex(x,y)));
+                        advanceTracer(edge,BEHIND_LEFT,BEHIND,INNER_OUTER);
                         //System.out.println("Found INNER-OUTER Pixel (Case 2)");
                     }
                 }else{
-                    if(getPixelAtDirection(Dir.LEFT) == activeColor){ //Case 3
-                        advanceTracer(edge,Dir.LEFT,Dir.LEFT,Pixel.Code.STRAIGHT);
+                    if(getPixelAtDirection(LEFT) == activeColor){ //Case 3
+                        advanceTracer(edge,LEFT,LEFT,STRAIGHT);
                         //System.out.println("Found STRAIGHT Pixel (Case 3)");
                     }else{ //Case 4
-                        edge.addPixel(new Pixel(x,y,activeColor, Pixel.Code.OUTER,getIndex(x,y)));
+                        edge.addPixel(new Pixel(x,y,activeColor, OUTER,getIndex(x,y)));
                         foundPixels.add(getIndex(x,y));
                         //System.out.println("Found OUTER Pixel (Case 4)");
                     }
                 }
                 //Stage 2
-                if(getPixelAtDirection(Dir.AHEAD_LEFT) == activeColor) { //Case 6
-                    if (getPixelAtDirection(Dir.AHEAD) == activeColor) {
-                        advanceTracer(edge, Dir.AHEAD, Dir.LEFT, Pixel.Code.INNER);
-                        moveTracer(Dir.AHEAD);
-                        changeDirection(Dir.RIGHT);
+                if(getPixelAtDirection(AHEAD_LEFT) == activeColor) { //Case 6
+                    if (getPixelAtDirection(AHEAD) == activeColor) {
+                        advanceTracer(edge, AHEAD, LEFT, INNER);
+                        moveTracer(AHEAD);
+                        changeDirection(RIGHT);
                         //System.out.println("Found INNER Pixel (Case 6)");
                     } else { //Case 5
-                        edge.addPixel(new Pixel(x, y, activeColor, Pixel.Code.INNER_OUTER,getIndex(x,y)));
+                        edge.addPixel(new Pixel(x, y, activeColor, INNER_OUTER,getIndex(x,y)));
                         foundPixels.add(getIndex(x,y));
-                        advanceTracer(edge, Dir.AHEAD_LEFT, Dir.AHEAD, Pixel.Code.INNER_OUTER);
+                        advanceTracer(edge, AHEAD_LEFT, AHEAD, INNER_OUTER);
                         //System.out.println("Found INNER-OUTER Pixel (Case 5)");
                     }
-                }else if(getPixelAtDirection(Dir.AHEAD) == activeColor){ //Case 7
-                    moveTracer(Dir.AHEAD);
-                    changeDirection(Dir.RIGHT);
+                }else if(getPixelAtDirection(AHEAD) == activeColor){ //Case 7
+                    moveTracer(AHEAD);
+                    changeDirection(RIGHT);
                     //System.out.println("Case 7 (Move AHEAD and look RIGHT");
                 }else { //Case 8
-                    changeDirection(Dir.BEHIND);
-                    edge.getLastPixel().setCode(Pixel.Code.OUTER);
+                    changeDirection(BEHIND);
+                    edge.getLastPixel().setCode(OUTER);
 
                     //System.out.println("Found OUTER Pixel (Case 8)");
                 }
@@ -483,12 +654,12 @@ public class Tracer {
 //                }
             }while(currentIndex != startPixel);
             if(currentIndex == startPixel){
-                edge.add(new Pixel(x,y,activeColor, Pixel.Code.INNER,getIndex(x,y)));
+                edge.add(new Pixel(x,y,activeColor, INNER,getIndex(x,y)));
                 foundPixels.add(getIndex(x,y));
 //                edge.clear();
             }
         }
-//        splineManager.draw(edge);
+        splineManager.draw(edge);
 
         System.out.println("Trace completed by thread "+Thread.currentThread().getId());
         return edge;

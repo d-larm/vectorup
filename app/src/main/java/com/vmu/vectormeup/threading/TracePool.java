@@ -3,6 +3,7 @@ package com.vmu.vectormeup.threading;
 import android.app.ProgressDialog;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.AsyncTask;
 import android.widget.Button;
@@ -52,19 +53,37 @@ public class TracePool {
             paths = p;
         }
 
+        public UpdateThread(Canvas c, ArrayList<SPath> p,ArrayList<Contour> e){
+            canvas = c;
+            paths = p;
+            edges = e;
+        }
+
         public void run(){
-            for(int i=0;i<image.length;i++){
-                image[i] = -1;
-            }
-            for(int i=0;i<edges.size();i++){
-                for(int j=0;j<edges.get(i).size();j++){
-                    Pixel p = edges.get(i).getPixel(j);
-                    image[p.getIndex(w)] = p.getColor();
+//            for(int i=0;i<image.length;i++){
+//                image[i] = -1;
+//            }
+//            for(int i=0;i<edges.size();i++){
+//                for(int j=0;j<edges.get(i).size();j++){
+//                    Pixel p = edges.get(i).getPixel(j);
+//                    image[p.getIndex(w)] = p.getColor();
+//                }
+//            }
+            Paint p = new Paint();
+            p.setColor(Color.GREEN);
+            p.setStrokeWidth(2);
+            p.setStyle(Paint.Style.STROKE);
+
+
+            for(int i=0;i<paths.size();i++){
+                for(int j=0;j<paths.get(i).size();j++){
+                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
                 }
             }
-//            for(int i=0;i<paths.size();i++){
-//                for(int j=0;j<paths.get(i).size();j++){
-//                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+
+//            for(int i=0;i<edges.size();i++){
+//                for(int j=0;j<edges.get(i).size();j+=20){
+//                    canvas.drawPoint(edges.get(i).get(j).getX(),edges.get(i).get(j).getY(),p);
 //                }
 //            }
         }
@@ -125,7 +144,7 @@ public class TracePool {
                         //Queue of Runnables
                         traceQueue
         );
-        ArrayList<Contour> edges = new ArrayList<Contour>(map.length);
+        ArrayList<Contour> edges = new ArrayList<>(map.length);
 
 
         for(int i=0;i<map.length;i++){
@@ -142,22 +161,8 @@ public class TracePool {
         try {
             threadpool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 
-            UpdateThread u = new UpdateThread(image,edges);
+            UpdateThread u = new UpdateThread(canvas,paths,edges);
             u.run();
-//            for(int i=0;i<image.length;i++){
-//                image[i] = -1;
-//            }
-//            for(int i=0;i<edges.size();i++){
-//                for(int j=0;j<edges.get(i).size();j++){
-//                    Pixel p = edges.get(i).getPixel(j);
-//                    image[p.getIndex(w)] = p.getColor();
-//                }
-//            }
-////            for(int i=0;i<paths.size();i++){
-////                for(int j=0;j<paths.get(i).size();j++){
-////                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
-////                }
-////            }
             isBusy = false;
             System.out.println("Process complete");
             start.setEnabled(true);

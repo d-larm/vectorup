@@ -45,7 +45,7 @@ public class SplineManager {
 
    public void setCanvas(Canvas c){
        this.canvas = canvas;
-       paths = new ArrayList<>(1000);
+       paths = new ArrayList<>(100);
    }
 
    public void setStart(Pixel p){
@@ -60,7 +60,7 @@ public class SplineManager {
         paint.setStyle(Paint.Style.STROKE);
 //        System.out.println("Contour of size " + pixels.size() + "for thread "+Thread.currentThread().getId());
         if(pixels.size() > 1){
-            for(int i = pixels.size() - 2; i < pixels.size(); i++){
+            for(int i = 0; i < pixels.size(); i++){
                 if(i >= 0){
                     Pixel pixel = pixels.get(i);
 
@@ -87,13 +87,22 @@ public class SplineManager {
             if(pixel.getIndex() == startPixel.getIndex() && !first){
                 currentPath.close();
                 edgePath.add(currentPath);
+                currentPath = new Path();
+
 //                canvas.drawPath(currentPath, paint);
                 if(i < pixels.size() - 1) {
 //                    System.out.println("Reached end,change start pixel");
-                    currentPath = new Path();
+//                    currentPath.toggleInverseFillType();
+//                    for(int k = 0; k < edgePath.size(); k++)
+//                        System.out.println("Path "+ k + " empty? " +edgePath.get(k).isEmpty());
+                    paint.setColor(Color.WHITE);
+                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
                     startPixel = pixels.get(i + 1);
-                    currentPath.moveTo(startPixel.getX(), startPixel.getY());
+
+                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
+                    currentPath.moveTo(startPixel.getX(),startPixel.getY());
                     i++;
+                    paint.setColor(pixels.getColor());
                 }
             }
             if(first){

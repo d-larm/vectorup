@@ -5,12 +5,12 @@ package com.vmu.vectormeup.trace;
  */
 
 public class Pixel {
-    public enum Code{
-        INNER,OUTER,INNER_OUTER,STRAIGHT
-    }
+//    public enum Code{
+//        INNER,OUTER,INNER_OUTER,STRAIGHT
+//    }
     private int x;
     private int y;
-    private Code type;
+    private int type = -1;
     private int color;
     private float dx=0;
     private float dy=0;
@@ -19,25 +19,23 @@ public class Pixel {
     public Pixel(int x, int y){
         this.x = x;
         this.y = y;
-        this.type = null;
         this.color = -1;
     }
 
     public Pixel(int x, int y, int color){
         this.x = x;
         this.y = y;
-        this.type = null;
         this.color = color;
     }
 
-    public Pixel(int x, int y, int color, Code type){
+    public Pixel(int x, int y, int color, int type){
         this.x = x;
         this.y = y;
         this.type = type;
         this.color = color;
     }
 
-    public Pixel(int x, int y, int color, Code type,int index){
+    public Pixel(int x, int y, int color, int type,int index){
         this.x = x;
         this.y = y;
         this.type = type;
@@ -53,7 +51,7 @@ public class Pixel {
         return y;
     }
 
-    public Code getType(){
+    public int getType(){
         return type;
     }
 
@@ -65,7 +63,7 @@ public class Pixel {
 
     public int getIndex(int imgWidth) { return x + imgWidth*y; }
 
-    public void setCode(Code type){
+    public void setCode(int type){
         this.type = type;
     }
 
