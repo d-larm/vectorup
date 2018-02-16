@@ -95,6 +95,7 @@ public class Tracer {
     private boolean backToStart = false;
     private SplineManager splineManager;
 
+
     public Tracer(int[] image,int w,int h, int color){
         this.image = image;
         this.w = w;
@@ -117,92 +118,6 @@ public class Tracer {
         splineManager = sm;
     }
 
-    private int getPixelAtDirection(Dir dir){
-        int xPos = getPixelX(currentIndex);
-        int yPos = getPixelY(currentIndex);
-//        if(front == 0) //NORTH
-//            relativePos = dir; //Directions not shifted
-//        else if(front == 1) //EAST
-//            relativePos = dir.next().next(); //Directions shifted eastwards (ahead becomes right)
-//        else if(front == 2) //SOUTH
-//             relativePos = dir.next().next().next().next(); //Directions shifted southwards (ahead becomes behind)
-//        else if(front == 3) //WEST
-//            relativePos = dir.prev().prev();//Directions shifted westwards (ahead becomes left)
-//        else
-//            return -1;
-
-        if(front == 0) //NORTH
-            dir = dir; //Directions not shifted
-        else if(front == 1) //EAST
-            dir = dir.next2(); //Directions shifted eastwards (ahead becomes right)
-        else if(front == 2) //SOUTH
-            dir = dir.next4(); //Directions shifted southwards (ahead becomes behind)
-        else if(front == 3) //WEST
-            dir = dir.prev2();//Directions shifted westwards (ahead becomes left)
-        else
-            return -1;
-
-        switch(dir) {
-            case AHEAD: //get pixel ahead
-                if (yPos > 0)
-                    searchedIndex = getIndex(xPos, yPos - 1);
-                else
-                    searchedIndex = -1;
-                break;
-            case AHEAD_RIGHT: //get pixel ahead and right
-                if (yPos > 0 && xPos < w-1)
-                    searchedIndex = getIndex(xPos + 1, yPos - 1);
-                else
-                    searchedIndex = -1;
-                break;
-            case RIGHT: //get pixel to the right
-                if (xPos < w-1)
-                    searchedIndex = getIndex(xPos + 1, yPos);
-                else
-                    searchedIndex = -1;
-                break;
-            case BEHIND_RIGHT: //get pixel behind and right
-                if (xPos < w-1 && yPos < h-1)
-                    searchedIndex = getIndex(xPos + 1, yPos + 1);
-                else
-                    searchedIndex = -1;
-                break;
-            case BEHIND: //get pixel behind
-                if (yPos < h-1)
-                    searchedIndex = getIndex(xPos, yPos + 1);
-                else
-                    searchedIndex = -1;
-                break;
-            case BEHIND_LEFT: //get pixel behind and left
-                if (xPos > 0 && yPos < h-1)
-                    searchedIndex = getIndex(xPos - 1, yPos + 1);
-                else
-                    searchedIndex = -1;
-                break;
-            case LEFT: //get pixel to the left
-                if (xPos > 0)
-                    searchedIndex = getIndex(xPos - 1, yPos);
-                else
-                    searchedIndex = -1;
-                break;
-            case AHEAD_LEFT: //get pixel ahead and left
-                if (xPos > 0 && yPos > 0)
-                    searchedIndex = getIndex(xPos - 1, yPos - 1);
-                else
-                    searchedIndex = -1;
-                break;
-        }
-        if(searchedIndex != -1){
-//            //System.out.println("Scanned color: "+image[searchedIndex]+ ", active color: "+activeColor);
-            if(searchedIndex < 0 || searchedIndex > image.length-1)
-                return Integer.MAX_VALUE;
-            else
-                return image[searchedIndex];
-        }
-
-        else
-            return Integer.MAX_VALUE;
-    }
 
     private int getPixelAtDirection(int dir){
         int xPos = getPixelX(currentIndex);
@@ -291,19 +206,6 @@ public class Tracer {
             return Integer.MAX_VALUE;
     }
 
-    private void changeDirection(Dir newDir){ //Sets the absolute direction of the tracer using a relative direction
-        switch(newDir){
-            case LEFT:
-                front = (front-1 % 4 + 4) % 4;break;
-            case RIGHT:
-                front = (front+1 % 4 + 4) % 4;break;
-            case BEHIND:
-                front = (front+2 % 4 + 4) % 4;break;
-            default:
-                break;
-        }
-    }
-
     private void changeDirection(int newDir){ //Sets the absolute direction of the tracer using a relative direction
         switch(newDir){
             case LEFT:
@@ -325,68 +227,6 @@ public class Tracer {
         y = getPixelY(currentIndex);
 
     }
-
-//
-//    private void findStart(){
-//        Random rand = new Random();
-//        boolean canStart;
-//        int maxSearch = w*h/4;
-//        int searchCount = 0;
-//        do{
-//            searchCount++;
-//            canStart = false;
-//            front = 0;
-//            currentIndex = rand.nextInt(image.length);
-//            startPixel = currentIndex;
-//            x = getPixelX(currentIndex);
-//            y = getPixelY(currentIndex);
-////            System.out.println("Looking at ("+x+","+y+") for start position");
-//            if(getPixel(currentIndex) == activeColor){
-//                for(int i=0;i<4;i++){
-//                    if(getPixelAtDirection(BEHIND) != activeColor)
-//                        if(getPixelAtDirection(Dir.LEFT) != activeColor){
-//                            if(getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor){
-//                                canStart = true;
-//                                //System.out.println("Found start position");
-//                                break;
-//                            }
-//                        }else{
-//                            //System.out.println("Found start position");
-//                            canStart = true;
-//                            break;
-//                        }
-//                    changeDirection(Dir.RIGHT);
-//                }
-//            }else{
-//                if(searchCount >= maxSearch){
-//                    for(int k=0;k<image.length;k++){
-//                        currentIndex = k;
-//                        startPixel = currentIndex;
-//                        x = getPixelX(currentIndex);
-//                        y = getPixelY(currentIndex);
-//                        if(getPixel(currentIndex) == activeColor) {
-//                            for (int i = 0; i < 4; i++) {
-//                                if (getPixelAtDirection(Dir.BEHIND) != activeColor)
-//                                    if (getPixelAtDirection(Dir.LEFT) != activeColor) {
-//                                        if (getPixelAtDirection(Dir.BEHIND_LEFT) != activeColor) {
-//                                            canStart = true;
-//                                            //System.out.println("Found start position");
-//                                            break;
-//                                        }
-//                                    } else {
-//                                        //System.out.println("Found start position");
-//                                        canStart = true;
-//                                        break;
-//                                    }
-//                                changeDirection(Dir.RIGHT);
-//                            }
-//                        }
-//                    }
-//                    break;
-//                }
-//            }
-//        }while(canStart == false);
-//    }
 
     private void findStart(){
         Random rand = new Random();
@@ -570,10 +410,20 @@ public class Tracer {
 //        System.out.println("Added pixel with color "+activeColor+" at ("+x+","+y+")");
     }
 
+    private void addStartPixel(int x, int y,Contour e){
+        Pixel start = new Pixel(x,y,activeColor, INNER,getIndex(x,y));
+        start.setAsStart();
+        e.add(start);
+        foundPixels.add(getIndex(x,y));
+
+
+    }
+
     public Contour trace(){
-        Contour edge = new Contour(activeColor,w*h);
+        Contour edge = new Contour(activeColor,w*h/4);
         int sampleRate = 1;
         int resolution = 8;
+        int count = 0;
         boolean initialisedStart = false;
         for(int i=0;i<image.length;i+=sampleRate){ //Uses every pixel as the start pixel
 
@@ -594,10 +444,11 @@ public class Tracer {
             if(startFoundAlready == true) //If the start pixel is already in the edge list then go to next start pixel
                 continue;
 
-            if(splineManager.canSetStart()){
-                splineManager.setStart(new Pixel(x,y,activeColor, INNER,getIndex(x,y)));
-            }
+//            if(splineManager.canSetStart()){
+//                splineManager.setStart(new Pixel(x,y,activeColor, INNER,getIndex(x,y)));
+//            }
 
+            addStartPixel(x,y,edge);
 
             do{
 //                System.out.println("Contouring begins");
@@ -605,66 +456,80 @@ public class Tracer {
                 if(getPixelAtDirection(BEHIND_LEFT) == activeColor){ //Case 1
                     if(getPixelAtDirection(LEFT) == activeColor){
                         advanceTracer(edge,LEFT,LEFT,INNER);
-                        moveTracer(LEFT);
-                        changeDirection(LEFT);
-                        //System.out.println("Found INNER Pixel (Case 1)");
+                        advanceTracer(edge,LEFT,LEFT,-1);
+//                        moveTracer(LEFT);
+//                        changeDirection(LEFT);
+//                        System.out.println("Found INNER Pixel (Case 1)" + printLocation() );
                     }
                     else{ //Case 2
-                        edge.addPixel(new Pixel(x,y,activeColor, INNER_OUTER,getIndex(x,y)));
+                        edge.getLastPixel().setCode(INNER);
+//                       edge.addPixel(new Pixel(x,y,activeColor, INNER_OUTER,getIndex(x,y)));
                         advanceTracer(edge,BEHIND_LEFT,BEHIND,INNER_OUTER);
-                        //System.out.println("Found INNER-OUTER Pixel (Case 2)");
+//                        System.out.println("Found INNER-OUTER Pixel (Case 2)"+ printLocation());
                     }
                 }else{
                     if(getPixelAtDirection(LEFT) == activeColor){ //Case 3
                         advanceTracer(edge,LEFT,LEFT,STRAIGHT);
-                        //System.out.println("Found STRAIGHT Pixel (Case 3)");
+//                        System.out.println("Found STRAIGHT Pixel (Case 3)"+ printLocation());
                     }else{ //Case 4
-                        edge.addPixel(new Pixel(x,y,activeColor, OUTER,getIndex(x,y)));
-                        foundPixels.add(getIndex(x,y));
-                        //System.out.println("Found OUTER Pixel (Case 4)");
+//                        edge.addPixel(new Pixel(x,y,activeColor, OUTER,getIndex(x,y)));
+//                        foundPixels.add(getIndex(x,y));
+                        edge.getLastPixel().setCode(OUTER);
+//                        System.out.println("Found OUTER Pixel (Case 4)"+ printLocation());
                     }
                 }
                 //Stage 2
                 if(getPixelAtDirection(AHEAD_LEFT) == activeColor) { //Case 6
                     if (getPixelAtDirection(AHEAD) == activeColor) {
                         advanceTracer(edge, AHEAD, LEFT, INNER);
-                        moveTracer(AHEAD);
-                        changeDirection(RIGHT);
-                        //System.out.println("Found INNER Pixel (Case 6)");
+                        advanceTracer(edge, AHEAD, RIGHT, -1);
+//                        moveTracer(AHEAD);
+//                        changeDirection(RIGHT);
+//                        System.out.println("Found INNER Pixel (Case 6)"+ printLocation());
                     } else { //Case 5
-                        edge.addPixel(new Pixel(x, y, activeColor, INNER_OUTER,getIndex(x,y)));
-                        foundPixels.add(getIndex(x,y));
+//                        edge.addPixel(new Pixel(x, y, activeColor, INNER_OUTER,getIndex(x,y)));
+//                        foundPixels.add(getIndex(x,y));
+                        edge.getLastPixel().setCode(INNER_OUTER);
                         advanceTracer(edge, AHEAD_LEFT, AHEAD, INNER_OUTER);
-                        //System.out.println("Found INNER-OUTER Pixel (Case 5)");
+//                        System.out.println("Found INNER-OUTER Pixel (Case 5)"+ printLocation());
                     }
                 }else if(getPixelAtDirection(AHEAD) == activeColor){ //Case 7
-                    moveTracer(AHEAD);
-                    changeDirection(RIGHT);
-                    //System.out.println("Case 7 (Move AHEAD and look RIGHT");
+                    advanceTracer(edge, AHEAD, RIGHT, -1);
+//                    edge.addPixel(new Pixel(x,y,activeColor, -1,getIndex(x,y)));
+//                    moveTracer(AHEAD);
+//                    changeDirection(RIGHT);
+//                    System.out.println("Case 7 (Move AHEAD and look RIGHT"+ printLocation());
                 }else { //Case 8
                     changeDirection(BEHIND);
-                    edge.getLastPixel().setCode(OUTER);
+                    if(edge.getLastPixel() != null)
+                        edge.getLastPixel().setCode(OUTER);
 
-                    //System.out.println("Found OUTER Pixel (Case 8)");
+//                    System.out.println("Found OUTER Pixel (Case 8)"+ printLocation());
                 }
-//                if(edge.size() >= resolution){
-//                    splineManager.draw(edge); //Joins all the pixels found in the contour list
-//                    for(int k=0;k<edge.size()-1;k++) //Removes all but the most recently discovered pixel from the contour list
-//                        edge.remove(k);
-//                }
+
             }while(currentIndex != startPixel);
             if(currentIndex == startPixel){
-                edge.add(new Pixel(x,y,activeColor, INNER,getIndex(x,y)));
-                foundPixels.add(getIndex(x,y));
+                Pixel start = new Pixel(x,y,activeColor, INNER,getIndex(x,y));
+                start.setAsStart();
+                edge.add(start);
+                count++;
+//                System.out.println("Start pixel found again"+ printLocation());
+
+//                foundPixels.add(getIndex(x,y));
+
 //                edge.clear();
             }
         }
+        System.out.println("There were " + count + "contours found");
         splineManager.draw(edge);
 
         System.out.println("Trace completed by thread "+Thread.currentThread().getId());
         return edge;
     }
 
+    private String printLocation(){
+        return "("+x+","+y+")";
+    }
 
 
 

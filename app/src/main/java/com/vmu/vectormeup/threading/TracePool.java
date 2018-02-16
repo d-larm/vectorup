@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.widget.Button;
 
@@ -73,7 +74,12 @@ public class TracePool {
             p.setColor(Color.GREEN);
             p.setStrokeWidth(2);
             p.setStyle(Paint.Style.STROKE);
-
+            canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
+//            for(int i=0;i<edges.size();i++){
+//                for(int j=0;j<edges.get(i).size();j+=1){
+//                    canvas.drawPoint(edges.get(i).get(j).getX()+ 35,edges.get(i).get(j).getY(),p);
+//                }
+//            }
 
             for(int i=0;i<paths.size();i++){
                 for(int j=0;j<paths.get(i).size();j++){
@@ -81,11 +87,7 @@ public class TracePool {
                 }
             }
 
-//            for(int i=0;i<edges.size();i++){
-//                for(int j=0;j<edges.get(i).size();j+=20){
-//                    canvas.drawPoint(edges.get(i).get(j).getX(),edges.get(i).get(j).getY(),p);
-//                }
-//            }
+
         }
     }
 

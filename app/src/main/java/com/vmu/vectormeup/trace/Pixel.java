@@ -15,6 +15,7 @@ public class Pixel {
     private float dx=0;
     private float dy=0;
     private int index;
+    private boolean isStart = false;
 
     public Pixel(int x, int y){
         this.x = x;
@@ -92,9 +93,14 @@ public class Pixel {
         return dy;
     }
 
+    public void setAsStart(){isStart = true;}
+
+    public boolean isStart(){return isStart;}
 
     public void setPosition(int x, int y){
         setX(x);
         setY(y);
     }
+
+
 }

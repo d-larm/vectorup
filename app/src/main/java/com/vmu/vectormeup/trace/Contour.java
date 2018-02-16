@@ -41,7 +41,7 @@ public class Contour extends ArrayList<Pixel>{
     public void removePixel(int i){remove(i);
     }
 
-    public Pixel getLastPixel(){ return get(size()-1); }
+    public Pixel getLastPixel(){ if(this.size() > 0) return get(size()-1);else return null; }
 
     public Pixel[] getPixelArray(){
         return (Pixel[]) toArray();

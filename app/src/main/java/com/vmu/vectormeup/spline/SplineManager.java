@@ -80,40 +80,49 @@ public class SplineManager {
                 }
             }
         }
-
-        boolean first = true;
+        boolean start = true;
         for(int i = 0; i < pixels.size(); i++){
             Pixel pixel = pixels.get(i);
-            if(pixel.getIndex() == startPixel.getIndex() && !first){
+            if(pixel.isStart() && start == false){
                 currentPath.close();
                 edgePath.add(currentPath);
                 currentPath = new Path();
 
 //                canvas.drawPath(currentPath, paint);
                 if(i < pixels.size() - 1) {
-//                    System.out.println("Reached end,change start pixel");
-//                    currentPath.toggleInverseFillType();
-//                    for(int k = 0; k < edgePath.size(); k++)
-//                        System.out.println("Path "+ k + " empty? " +edgePath.get(k).isEmpty());
-                    paint.setColor(Color.WHITE);
-                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
-                    startPixel = pixels.get(i + 1);
-
-                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
-                    currentPath.moveTo(startPixel.getX(),startPixel.getY());
-                    i++;
-                    paint.setColor(pixels.getColor());
+                    start = true;
+                    continue;
+//                    if(pixels.get(i+1).isStart())
+//                        System.out.println("Reached end,change start pixel");
+////                    currentPath.toggleInverseFillType();
+////                    for(int k = 0; k < edgePath.size(); k++)
+////                        System.out.println("Path "+ k + " empty? " +edgePath.get(k).isEmpty());
+//                    paint.setColor(Color.WHITE);
+////                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
+//                    startPixel = pixels.get(i + 1);
+//
+////                    canvas.drawPoint(startPixel.getX(),startPixel.getY(), paint);
+//                    currentPath.moveTo(startPixel.getX(),startPixel.getY());
+//                    i++;
+//                    paint.setColor(pixels.getColor());
                 }
             }
-            if(first){
-                first = false;
+            if(start == true){
+                start = false;
                 currentPath.moveTo(pixel.getX(), pixel.getY());
             }
-            else{
+            else if(i <  pixels.size() - 1){
                 Pixel prev = pixels.get(i - 1);
-                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
+                Pixel next = pixels.get(i + 1);
+//                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
+                currentPath.cubicTo(prev.getX(),prev.getY(),pixel.getX(),pixel.getY(),next.getX(),next.getY());
             }
+//            else{
+//                Pixel prev = pixels.get(i - 1);
+//                currentPath.cubicTo(prev.getX() + prev.getDx(), prev.getY() + prev.getDy(), pixel.getX() - pixel.getDx(), pixel.getY() - pixel.getDy(), pixel.getX(), pixel.getY());
+//            }
         }
+        System.out.println(edgePath.size());
         paths.add(edgePath);
     }
 
