@@ -1,19 +1,14 @@
 package com.vmu.vectormeup.threading;
 
-import android.app.ProgressDialog;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PorterDuff;
-import android.os.AsyncTask;
 import android.widget.Button;
 
-import com.vmu.vectormeup.NeuQuant;
 import com.vmu.vectormeup.spline.SPath;
 import com.vmu.vectormeup.spline.SplineManager;
 import com.vmu.vectormeup.trace.Contour;
-import com.vmu.vectormeup.trace.Pixel;
 
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -75,16 +70,22 @@ public class TracePool {
             p.setStrokeWidth(2);
             p.setStyle(Paint.Style.STROKE);
             canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
-//            for(int i=0;i<edges.size();i++){
-//                for(int j=0;j<edges.get(i).size();j+=1){
-//                    canvas.drawPoint(edges.get(i).get(j).getX()+ 35,edges.get(i).get(j).getY(),p);
-//                }
-//            }
+
+//            for(int i=0;i<paths.size();i++)
+//                if(paths.get(i).getPaint().getColor() != Color.WHITE)
+//                    canvas.drawPath(paths.get(i).get(0),paths.get(i).getPaint());
 
             for(int i=0;i<paths.size();i++){
-                for(int j=0;j<paths.get(i).size();j++){
-                    canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
-                }
+                if(paths.get(i).getPaint().getColor() != Color.WHITE)
+                    for(int j=0;j<paths.get(i).size();j++){
+                        canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+                    }
+            }
+            for(int i=0;i<paths.size();i++){
+                if(paths.get(i).getPaint().getColor() == Color.WHITE)
+                    for(int j=1;j<paths.get(i).size();j++){
+                        canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+                    }
             }
 
 

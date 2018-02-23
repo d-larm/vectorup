@@ -1,4 +1,4 @@
-package com.vmu.vectormeup;// Constructors:
+package com.vmu.vectormeup.preprocesses;// Constructors:
 //    public NeuQuant (Image im, ImageObserver obs) throws IOException -- default sample = 1
 //    public NeuQuant (int sample, Image im, ImageObserver obs) throws IOException
 //    public NeuQuant (Image im, int w, int h) throws IOException -- default sample = 1

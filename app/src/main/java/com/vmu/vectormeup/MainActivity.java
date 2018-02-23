@@ -1,8 +1,6 @@
 package com.vmu.vectormeup;
 
-import android.media.Image;
 import android.os.SystemClock;
-import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.os.Bundle;
@@ -17,7 +15,6 @@ import android.view.View.OnClickListener;
 import com.ipaulpro.afilechooser.utils.*;
 import android.content.Intent;
 import android.net.Uri;
-import java.io.File;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.content.ActivityNotFoundException;
@@ -25,22 +22,16 @@ import android.provider.MediaStore;
 import java.util.*;
 
 import java.io.*;
-import java.net.URI;
-import java.nio.IntBuffer;
 
-import android.app.Activity;
-import android.app.Activity;
-
-import org.w3c.dom.Text;
-
+import com.vmu.vectormeup.preprocesses.NeuQuant;
 import com.vmu.vectormeup.threading.TracePool;
 import com.vmu.vectormeup.trace.*;
-import android.graphics.Matrix;
 
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CHOOSER = 1234;
     private int sampleFactor = 10;
+    private int minPathSize = 1;
     private int colors = 256;
     private ImageView canvas;
     private Uri uri;
@@ -129,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final SeekBar seekBarSampleFactor = (SeekBar) findViewById(R.id.sampleFactor);
-//        final SeekBar seekBarMaxPoints = (SeekBar) findViewById(R.id.maxPoints);
+        final SeekBar seekBarPathSize = (SeekBar) findViewById(R.id.pathSize);
+        final SeekBar seekBarMaxPoints2 = (SeekBar) findViewById(R.id.maxPoints2);
         final SeekBar seekBarColours = (SeekBar) findViewById(R.id.colors);
 
         //Sets colours of the seekbar
@@ -137,6 +129,10 @@ public class MainActivity extends AppCompatActivity {
         seekBarSampleFactor.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
         seekBarColours.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
         seekBarColours.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+        seekBarPathSize.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
+        seekBarPathSize.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+        seekBarMaxPoints2.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
+        seekBarMaxPoints2.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
 
         //Sets the canvas as the image view of the app
         canvas = (ImageView) findViewById(R.id.myImageView);
@@ -191,23 +187,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 //
-//        seekBarMaxPoints.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-//                TextView label = (TextView) findViewById(R.id.pointsValue);
-//                label.setText(String.valueOf(progress+1));
-//            }
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//                // TODO Auto-generated method stub
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                // TODO Auto-generated method stub
-//            }
-//        });
+        seekBarPathSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+                TextView label = (TextView) findViewById(R.id.pathSizeValue);
+                label.setText(String.valueOf(progress*10));
+                minPathSize = progress*10;
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+        });
 
         //Gets the events for the color seekbar
         seekBarColours.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -238,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 //                Log.i(SystemSettings.APP_TAG + " : " + HomeActivity.class.getName(), "Entered onClick method");
                 Toast.makeText(v.getContext(),
-                        "The favorite list would appear on clicking this icon",
+                        "Select an image",
                         Toast.LENGTH_LONG).show();
                 Intent getContentIntent = FileUtils.createGetContentIntent();
                 Intent intent = Intent.createChooser(getContentIntent, "Select an image");
@@ -343,8 +340,10 @@ public class MainActivity extends AppCompatActivity {
                                 final String path = FileUtils.getPath(this, uri);
                                 image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
                                 refreshCanvas(image);
+                                this.w = image.getWidth();
+                                this.h = image.getHeight();
                                 Toast.makeText(MainActivity.this,
-                                        "File Selected: " + path, Toast.LENGTH_LONG).show();
+                                         w+"x"+h+" image selected", Toast.LENGTH_LONG).show();
                             }
                         } catch (Exception e) {
                             Log.e("FileSelectorActivity", "File select error", e);
@@ -365,10 +364,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void set(Bitmap img) throws IOException {
+//        img = preprocess(img);
         nq = new NeuQuant(img, canvas, colors,sampleFactor);
         nq.init();
         this.w = img.getWidth();
         this.h = img.getHeight();
+
         pixels = new int[w * h];
         try {
             image.getPixels(pixels, 0, image.getWidth(), 0, 0, w, h);
@@ -377,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
                     "Could not process image into array", Toast.LENGTH_LONG).show();
             Log.e("Image Array", "Could not process bitmap array");
         }
+
 
 //        if ((pg.getStatus() & java.awt.image.ImageObserver.ABORT) != 0) {
 //            throw new IOException ("Image pixel grab aborted or errored");
@@ -431,5 +433,36 @@ public class MainActivity extends AppCompatActivity {
         }
         System.out.println("Process complete");
     }
+
+
+    public Bitmap blockAverage(int image[], int w, int h){
+        int blockSizeX = 3;
+        int blockSizeY = 3;
+        for(int i=0;i<image.length;i+=blockSizeX)
+            for(int j=0;j<image.length;j+=blockSizeY){
+                if(w - blockSizeX < blockSizeX)
+                    blockSizeX = w - blockSizeX;
+                if(w - blockSizeY < blockSizeY)
+                    blockSizeY = h - blockSizeY;
+                int avg = 0;
+                for(int k=0;k<blockSizeX;k++)
+                    for(int l=0;l<blockSizeY;l++)
+                        avg+= image[(h*(j+l)) + (i+k)];
+                avg/=(blockSizeX*blockSizeY);
+                for(int k=0;k<blockSizeX;k++)
+                    for(int l=0;l<blockSizeY;l++)
+                        image[(h*(j+l)) + (i+k)] = avg;
+            }
+        Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
+        newImg.setPixels(image, 0, w, 0, 0, w, h);
+        return newImg;
+    }
+
+    public Bitmap preprocess(Bitmap image){
+        int[] imageArray = new int[image.getWidth() * image.getHeight()];
+        image.getPixels(imageArray, 0, image.getWidth(), 0, 0, image.getWidth(), image.getHeight());
+        return blockAverage(imageArray,w,h);
+    }
+
 
 }

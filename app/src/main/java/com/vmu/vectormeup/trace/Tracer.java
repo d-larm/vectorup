@@ -521,6 +521,7 @@ public class Tracer {
             }
         }
         System.out.println("There were " + count + "contours found");
+
         splineManager.draw(edge);
 
         System.out.println("Trace completed by thread "+Thread.currentThread().getId());
