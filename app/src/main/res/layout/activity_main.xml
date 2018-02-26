@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--android:scaleType="centerInside"-->
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,12 +9,26 @@
     android:background="#ff252525"
     tools:context="com.vmu.vectormeup.MainActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:title="Vector Up"
+        app:titleTextColor="@color/white"
+        app:titleTextAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+
 
     <RelativeLayout
         android:id="@+id/imageLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/options">
+        android:layout_above="@+id/options"
+        android:layout_below="@+id/toolbar">
 
         <ImageView
             android:id="@+id/myImageView"
@@ -49,6 +64,25 @@
             android:gravity="center"
             android:text="Select image"
             android:textColor="#FFFF" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
+        <TextView
+            android:id="@+id/progressText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressBar"
+            android:layout_marginTop="30dp"
+            android:textSize="15pt"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:text="TextView" />
 
     </RelativeLayout>
 

@@ -4,8 +4,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
+import com.vmu.vectormeup.MainActivity;
 import com.vmu.vectormeup.spline.SPath;
 import com.vmu.vectormeup.spline.SplineManager;
 import com.vmu.vectormeup.trace.Contour;
@@ -25,12 +28,15 @@ public class TracePool {
     int h;
     int[] map;
     int count;
+    int minPathSize;
     boolean isBusy = false;
     Button start;
     LinkedBlockingQueue<Runnable> traceQueue;
     ThreadPoolExecutor threadpool;
     Canvas canvas;
     ArrayList<SPath> paths;
+    TextView progressText;
+    MainActivity main;
 
     class UpdateThread implements Runnable{
         int[] image;
@@ -65,15 +71,21 @@ public class TracePool {
 //                    image[p.getIndex(w)] = p.getColor();
 //                }
 //            }
+            main.runOnUiThread(new Runnable() {
+                public void run() {
+                    progressText.setText("Creating Paths");
+                }
+            });
+
             Paint p = new Paint();
             p.setColor(Color.GREEN);
             p.setStrokeWidth(2);
             p.setStyle(Paint.Style.STROKE);
             canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
 
-//            for(int i=0;i<paths.size();i++)
-//                if(paths.get(i).getPaint().getColor() != Color.WHITE)
-//                    canvas.drawPath(paths.get(i).get(0),paths.get(i).getPaint());
+            for(int i=0;i<paths.size();i++)
+                if(paths.get(i).getPaint().getColor() == Color.WHITE && paths.get(i).size() > 0)
+                    canvas.drawPath(paths.get(i).get(0),paths.get(i).getPaint());
 
             for(int i=0;i<paths.size();i++){
                 if(paths.get(i).getPaint().getColor() != Color.WHITE)
@@ -92,7 +104,7 @@ public class TracePool {
         }
     }
 
-    public TracePool(int[] image,int w, int h, int[] map){
+    public TracePool(int[] image,int w, int h, int[] map,int minPathSize){
         this.image = image;
         this.w = w;
         this.h = h;
@@ -100,6 +112,8 @@ public class TracePool {
         count = map.length;
         paths = new ArrayList<SPath>(count);
         traceQueue = new LinkedBlockingQueue<>(count);
+        this.minPathSize = minPathSize;
+
 
     }
 
@@ -109,7 +123,7 @@ public class TracePool {
         this.count = 0;
     }
 
-    public void setParams(int[] image,int w, int h, int[] map){
+    public void setParams(int[] image,int w, int h, int[] map,int minp){
         this.image = image;
         this.w = w;
         this.h = h;
@@ -117,7 +131,13 @@ public class TracePool {
         count = map.length;
         paths = new ArrayList<SPath>(count);
         traceQueue = new LinkedBlockingQueue<>(count);
+        minPathSize = minp;
+
     }
+
+    public void setProgressTetx(TextView t){progressText = t;}
+
+    public void setMainActivity(MainActivity main) { this.main = main; }
 
     public boolean isBusy(){
         return isBusy;
@@ -153,7 +173,7 @@ public class TracePool {
         for(int i=0;i<map.length;i++){
             if(map[i] != Color.WHITE){
                 System.out.println(map[i]);
-                TraceTask t = new TraceTask(image,map[i],w,h,edges,new SplineManager(1000,canvas,paths));
+                TraceTask t = new TraceTask(image,map[i],w,h,edges,new SplineManager(1000,canvas,paths),minPathSize);
                 threadpool.execute(t);
             }
 

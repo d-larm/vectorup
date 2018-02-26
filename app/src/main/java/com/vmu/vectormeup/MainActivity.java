@@ -1,12 +1,17 @@
 package com.vmu.vectormeup;
 
+import android.content.res.ColorStateList;
 import android.os.SystemClock;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.graphics.*;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -117,7 +122,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.hide();
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
+
         setContentView(R.layout.activity_main);
+
+        final ProgressBar progressBar =  (ProgressBar) findViewById(R.id.progressBar);
+        final TextView progressText = (TextView) findViewById(R.id.progressText);
+
 
         final SeekBar seekBarSampleFactor = (SeekBar) findViewById(R.id.sampleFactor);
         final SeekBar seekBarPathSize = (SeekBar) findViewById(R.id.pathSize);
@@ -133,6 +148,12 @@ public class MainActivity extends AppCompatActivity {
         seekBarPathSize.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
         seekBarMaxPoints2.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
         seekBarMaxPoints2.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+
+        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setProgressTintList(ColorStateList.valueOf(Color.WHITE));
+
+        progressBar.setVisibility(View.INVISIBLE);
+        progressText.setVisibility(View.INVISIBLE);
 
         //Sets the canvas as the image view of the app
         canvas = (ImageView) findViewById(R.id.myImageView);
@@ -255,47 +276,62 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (SystemClock.elapsedRealtime() - mLastClickTime < 1500){
-                    return;
-                }
-                mLastClickTime = SystemClock.elapsedRealtime();
-//                if(!tp.isBusy()){
-//                    startButton.setEnabled(false);
-                    QuantiserThread q = new QuantiserThread(image,v);
-                    Thread thread = new Thread(q);
-                    try {
-                        thread.start();
-                        thread.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                final ColorFilter filter = canvas.getColorFilter();
+                progressBar.setVisibility(View.VISIBLE);
+                progressText.setVisibility(View.VISIBLE);
+                progressText.setText("Quantising image colors");
+                canvas.setColorFilter(Color.rgb(123, 123, 123), android.graphics.PorterDuff.Mode.MULTIPLY);
+
+                class WorkThread implements Runnable{
+                    View v;
+                    public WorkThread(View v){
+                        this.v = v;
                     }
-//                Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
-//                newImg.setPixels(pixels, 0, w, 0, 0, w, h);
-////                TracerThread t = new TracerThread(pixels,v);
-////                Thread thread2 = new Thread(t);
-////                try {
-////                    thread2.start();
-////                    thread2.join();
-////                } catch (InterruptedException e) {
-////                    e.printStackTrace();
-////                }
-                    Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
 
-                    tp.setStartButton(startButton);
-                    Canvas vectorCanvas = new Canvas(newImg);
-                    tp.setCanvas(vectorCanvas);
-                    trace();
-//                    new Thread(new ImageUpdaterThread(pixels,newImg)).start();
+                    public void run() {
+                        try {
+                            set(image);
+                        } catch (IOException e) {
+                            MainActivity.this.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast.makeText(v.getContext(),
+                                            "Error: Could not quantise color",
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                progressText.setText("Tracing contours");
+                            }
+                        });
+                        Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
+                        tp.setStartButton(startButton);
+                        tp.setProgressTetx(progressText);
+                        tp.setMainActivity(MainActivity.this);
+                        Canvas vectorCanvas = new Canvas(newImg);
+                        tp.setCanvas(vectorCanvas);
+                        trace();
+                        final Bitmap result = newImg;
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                progressBar.setVisibility(View.INVISIBLE);
+                                progressText.setVisibility(View.INVISIBLE);
+                                canvas.setColorFilter(filter);
+                                refreshCanvas(result);
+                            }
+                        });
 
-                    refreshCanvas(newImg);
+                    }
+                }
 
-                    Toast.makeText(v.getContext(),
-                            "Finished on "+w+"x"+h+" image",
-                            Toast.LENGTH_LONG).show();
-//                }else
-//                    Toast.makeText(v.getContext(),
-//                            "Currently Working. Please wait",
-//                            Toast.LENGTH_LONG).show();
+                WorkThread w = new WorkThread(v);
+                Thread thread = new Thread(w);
+                thread.start();
+
+                Toast.makeText(v.getContext(),
+                        "Finished on "+w+"x"+h+" image",
+                        Toast.LENGTH_LONG).show();
             }
 
         });
@@ -379,61 +415,16 @@ public class MainActivity extends AppCompatActivity {
             Log.e("Image Array", "Could not process bitmap array");
         }
 
-
-//        if ((pg.getStatus() & java.awt.image.ImageObserver.ABORT) != 0) {
-//            throw new IOException ("Image pixel grab aborted or errored");
-//        }
-
         for (int i = 0; i < w*h; i++) {
             pixels[i] = nq.convert(pixels[i]);
         }
-
-//        this.image = this.createImage(new MemoryImageSource(w, h, pixels, 0, w));
-
-//        Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
-//        newImg.setPixels(pixels, 0, w, 0, 0, w, h);
-//        // vector is your int[] of ARGB
-////        newImg.copyPixelsFromBuffer(IntBuffer.wrap(pixels));
-//
-//        refreshCanvas(newImg);
     }
 
     public void trace(){
         int[] map = nq.getColorMap();
-        tp.setParams(pixels,w,h,map);
+        tp.setParams(pixels,w,h,map,minPathSize);
         tp.traceImage();
     }
-
-    public void traceEdges(){
-
-        System.out.println("Image size: "+w+" x "+h);
-        int[] map = nq.getColorMap();
-        Tracer tracer = new Tracer(pixels,w,h);
-        edges = new Contour[map.length];
-        System.out.println(Arrays.toString(map));
-
-
-
-        for(int i=0;i<map.length;i++){
-            tracer.setActiveColor(map[i]);
-            edges[i] = tracer.trace();
-        }
-        System.out.println("Finished trace");
-
-        for(int i=0;i<pixels.length;i++){
-            pixels[i] = -123;
-        }
-
-        System.out.println("Drawing onto view");
-        for(int i=0;i<map.length;i++){
-            for(int j=0;j<edges[i].size();j++){
-                Pixel p = edges[i].getPixel(j);
-                pixels[p.getIndex(w)] = p.getColor();
-            }
-        }
-        System.out.println("Process complete");
-    }
-
 
     public Bitmap blockAverage(int image[], int w, int h){
         int blockSizeX = 3;
@@ -463,6 +454,5 @@ public class MainActivity extends AppCompatActivity {
         image.getPixels(imageArray, 0, image.getWidth(), 0, 0, image.getWidth(), image.getHeight());
         return blockAverage(imageArray,w,h);
     }
-
 
 }

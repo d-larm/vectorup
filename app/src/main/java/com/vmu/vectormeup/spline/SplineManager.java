@@ -25,6 +25,7 @@ public class SplineManager {
    Pixel startPixel;
    Path currentPath = new Path();
    boolean canSetStart = true;
+   int minPathSize = 0;
 //   final SeekBar seekBarMaxPoints2 = (SeekBar) findViewById(R.id.maxPoints2);
 
 
@@ -42,9 +43,13 @@ public class SplineManager {
     }
 
 
-   public        SplineManager(){
+   public SplineManager(){
             paths = new ArrayList<>(1000);
         }
+
+    public void setMinPathSize(int val){
+       minPathSize = val;
+    }
 
     public void setCanvas(Canvas c){
         this.canvas = canvas;
@@ -83,12 +88,11 @@ public class SplineManager {
         }
         boolean start = true;
         int pointCount = 0;
-        int minPoints = 250;
         for (int i = 0; i < pixels.size(); i++) {
             Pixel pixel = pixels.get(i);
             if (pixel.isStart() && start == false) {
                 currentPath.close();
-                if (pointCount >= minPoints)
+                if (pointCount >= minPathSize)
                     edgePath.add(currentPath);
 
                 pointCount = 0;

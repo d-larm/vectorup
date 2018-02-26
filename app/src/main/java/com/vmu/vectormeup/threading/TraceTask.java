@@ -29,7 +29,7 @@ public class TraceTask implements Runnable {
     Contour c;
 
 
-    public TraceTask( int[] image,int c,int w,int h, ArrayList<Contour> e,SplineManager sm) {
+    public TraceTask( int[] image,int c,int w,int h, ArrayList<Contour> e,SplineManager sm,int minPathSize) {
         super();
         this.image = image;
         this.activeColor = c;
@@ -37,6 +37,7 @@ public class TraceTask implements Runnable {
         this.h = h;
         this.imageContours = e;
         this.splineManager = sm;
+        sm.setMinPathSize(minPathSize);
 
 
     }
