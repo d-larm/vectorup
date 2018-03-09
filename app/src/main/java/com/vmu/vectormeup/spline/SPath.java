@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Created by Daniel on 21/01/2018.
  */
 
-public class SPath extends ArrayList<Path> {
+public class SPath extends ArrayList<CountedPath> {
 
     private Paint paint;
 

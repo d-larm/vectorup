@@ -135,8 +135,8 @@
                     android:layout_marginRight="0dp"
                     android:layout_marginTop="5dp"
                     android:layout_weight="0.48"
-                    android:max="6"
-                    android:progress="6" />
+                    android:max="4"
+                    android:progress="4" />
 
                 <TextView
                     android:id="@+id/colorValue"
@@ -255,7 +255,7 @@
                     android:layout_weight="0.10" />
 
                 <SeekBar
-                    android:id="@+id/maxPoints2"
+                    android:id="@+id/blur"
                     style="@style/Widget.AppCompat.SeekBar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -265,10 +265,10 @@
                     android:layout_marginTop="5dp"
                     android:layout_weight="0.48"
                     android:max="10"
-                    android:progress="3" />
+                    android:progress="0" />
 
                 <TextView
-                    android:id="@+id/pointsValue2"
+                    android:id="@+id/blurValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
@@ -276,7 +276,7 @@
                     android:layout_marginRight="10dp"
                     android:layout_marginTop="5dp"
                     android:gravity="center"
-                    android:text="1000"
+                    android:text="0"
                     android:tooltipText="Changes number of samples taken for colour quantisation process"
                     android:textColor="#FFF"
                     android:layout_weight="0.10" />

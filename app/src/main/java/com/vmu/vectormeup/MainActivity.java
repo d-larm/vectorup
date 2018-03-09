@@ -1,7 +1,17 @@
 package com.vmu.vectormeup;
 
+import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
+import android.os.Environment;
+import android.os.Parcelable;
 import android.os.SystemClock;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -39,91 +49,21 @@ public class MainActivity extends AppCompatActivity {
     private int minPathSize = 1;
     private int colors = 256;
     private ImageView canvas;
-    private Uri uri;
     private Bitmap image;
     private int[] pixels;
-    private boolean busyQ = false;
-    private boolean busy = false;
-    private boolean busyT = false;
     private int w = 0;
     private int h = 0;
     private NeuQuant nq;
     private Contour[] edges;
     private TracePool tp = new TracePool();
     private long mLastClickTime = 0;
-
-    class ImageUpdaterThread implements Runnable {
-        private int[] pixels;
-        private Bitmap image;
-        public ImageUpdaterThread(int[] p,Bitmap img) {
-            image = img;
-            pixels = p;
-        }
-
-        public void run() {
-            image.setPixels(pixels, 0, w, 0, 0, w, h);
-        }
-    }
-
-    class QuantiserThread implements Runnable {
-        Bitmap image;
-        View v;
-        QuantiserThread(Bitmap img,View v) {
-            image = img;
-            this.v = v;
-        }
-        public void run() {
-            if(!busyQ)
-                try {
-                    busyQ = true;
-                    set(image);
-                    busyQ = false;
-                } catch (IOException e) {
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(v.getContext(),
-                                    "Error: Could not quantise color",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-        }
-    }
-
-    class TracerThread implements Runnable {
-        int[] image;
-        View v;
-        TracerThread(int[] img,View v) {
-            image = img;
-            this.v = v;
-        }
-        public void run() {
-            if(!busyT)
-                try {
-                    busyT = true;
-                    traceEdges();
-                    busyT = false;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(v.getContext(),
-                                    "Error: Could not trace edges",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-        }
-    }
+    private Button startButton;
+    private int blurRadius;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.hide();
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
@@ -136,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         final SeekBar seekBarSampleFactor = (SeekBar) findViewById(R.id.sampleFactor);
         final SeekBar seekBarPathSize = (SeekBar) findViewById(R.id.pathSize);
-        final SeekBar seekBarMaxPoints2 = (SeekBar) findViewById(R.id.maxPoints2);
+        final SeekBar seekBarBlur = (SeekBar) findViewById(R.id.blur);
         final SeekBar seekBarColours = (SeekBar) findViewById(R.id.colors);
 
         //Sets colours of the seekbar
@@ -146,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         seekBarColours.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
         seekBarPathSize.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
         seekBarPathSize.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
-        seekBarMaxPoints2.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
-        seekBarMaxPoints2.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+        seekBarBlur.getProgressDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
+        seekBarBlur.getThumb().setColorFilter(getResources().getCo‌​lor(R.color.white), PorterDuff.Mode.SRC_ATOP);
 
         progressBar.setVisibility(View.VISIBLE);
         progressBar.setProgressTintList(ColorStateList.valueOf(Color.WHITE));
@@ -199,13 +139,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+
             }
+
         });
 //
         seekBarPathSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -213,18 +154,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
                 TextView label = (TextView) findViewById(R.id.pathSizeValue);
-                label.setText(String.valueOf(progress*10));
-                minPathSize = progress*10;
+                label.setText(String.valueOf(progress));
+                minPathSize = progress;
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+
             }
+
         });
 
         //Gets the events for the color seekbar
@@ -239,13 +182,36 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+
             }
+
+        });
+
+        //Gets the events for the color seekbar
+        seekBarBlur.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                TextView label = (TextView) findViewById(R.id.blurValue);
+                int value = progress;
+                label.setText(String.valueOf(value));
+                blurRadius = value;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
         });
 
         //Sets the ImageView to be clickable and allows selection of any bitmap image
@@ -254,25 +220,19 @@ public class MainActivity extends AppCompatActivity {
         myImage.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Log.i(SystemSettings.APP_TAG + " : " + HomeActivity.class.getName(), "Entered onClick method");
-                Toast.makeText(v.getContext(),
-                        "Select an image",
-                        Toast.LENGTH_LONG).show();
-                Intent getContentIntent = FileUtils.createGetContentIntent();
-                Intent intent = Intent.createChooser(getContentIntent, "Select an image");
                 try {
-                    startActivityForResult(intent, REQUEST_CHOOSER);
+                     openImageIntent();
                 } catch (ActivityNotFoundException e) {
                     Toast.makeText(v.getContext(),
                             "Could not open file browser",
                             Toast.LENGTH_LONG).show();
-                    // The reason for the existence of aFileChooser
                 }
             }
         });
 
-
-        final Button startButton = (Button) findViewById(R.id.startButton);
+        startButton = (Button) findViewById(R.id.startButton);
+        startButton.setEnabled(false);
+        startButton.setText("");
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -338,60 +298,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("Request code", Integer.toString(requestCode));
-        switch (requestCode) {
-            case REQUEST_CHOOSER:
-                if (resultCode == RESULT_OK) {
-                    if (data != null) {
-                        // Get the URI of the selected file
-                        final Uri uri = data.getData();
-                        this.uri = uri;
-                        Log.i("Data", "Uri = " + uri.toString());
-                        try {
-                            // Get the file path from the URI
-                            //Checks for read permissions before proceding
-                            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                                    != PackageManager.PERMISSION_GRANTED) { //No read permissions
-
-                                Toast.makeText(MainActivity.this,
-                                        "Permissions not given to read files", Toast.LENGTH_LONG).show();
-
-                                // Should we show an explanation?
-                                if (shouldShowRequestPermissionRationale(
-                                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                                    // Explain to the user why we need to read the contacts
-
-                                }
-                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                        1);
-
-                                // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
-                                // app-defined int constant that should be quite unique
-
-                                return;
-                            } else {
-
-                                final String path = FileUtils.getPath(this, uri);
-                                image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-                                refreshCanvas(image);
-                                this.w = image.getWidth();
-                                this.h = image.getHeight();
-                                Toast.makeText(MainActivity.this,
-                                         w+"x"+h+" image selected", Toast.LENGTH_LONG).show();
-                            }
-                        } catch (Exception e) {
-                            Log.e("FileSelectorActivity", "File select error", e);
-                        }
-                    }
-                }
-                break;
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     public void refreshCanvas(Bitmap newImage) {
         canvas.setImageBitmap(newImage);
         TextView canvasText = (TextView) findViewById(R.id.myImageViewText);
@@ -400,19 +306,40 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void set(Bitmap img) throws IOException {
-//        img = preprocess(img);
-        nq = new NeuQuant(img, canvas, colors,sampleFactor);
+        Bitmap image;
+        float aspectRatio = img.getHeight() > 0 ? (float)(img.getWidth())/ img.getHeight() : 1 ;
+        System.out.println("aspect ratio: " + aspectRatio);
+        image = Bitmap.createScaledBitmap(img,(int) (1000*aspectRatio),(int) (1000*(1/aspectRatio)),false);
+//        if(img.getWidth() > 1500 && img.getWidth() <= 2000 || img.getHeight() > 1500 && img.getHeight() <= 2000)
+//            image = Bitmap.createScaledBitmap(img, (int)(img.getWidth()*0.75),(int)(img.getHeight()*0.75),false);
+//        else if(img.getWidth() > 2000 && img.getWidth() <= 3000 || img.getHeight() > 2000 && img.getHeight() <= 3000)
+//            image = Bitmap.createScaledBitmap(img, (int)(img.getWidth()*0.5),(int)(img.getHeight()*0.5),false);
+//        else if(img.getWidth() > 3000 || img.getHeight() > 3000)
+//            image = Bitmap.createScaledBitmap(img, (int)(img.getWidth()*0.25),(int)(img.getHeight()*0.25),false);
+//        else
+//            image = Bitmap.createScaledBitmap(img,(img.getWidth()),(img.getHeight()),false);
+
+        if(blurRadius > 0)
+            image = BlurImage(image,blurRadius);
+
+        nq = new NeuQuant(image, canvas, colors,sampleFactor);
         nq.init();
-        this.w = img.getWidth();
-        this.h = img.getHeight();
+        this.w = image.getWidth();
+        this.h = image.getHeight();
+        System.out.println("w = " + w + ", h = " + h);
 
         pixels = new int[w * h];
         try {
             image.getPixels(pixels, 0, image.getWidth(), 0, 0, w, h);
         } catch (ArrayIndexOutOfBoundsException | IllegalStateException | IllegalArgumentException e) {
-            Toast.makeText(MainActivity.this,
-                    "Could not process image into array", Toast.LENGTH_LONG).show();
-            Log.e("Image Array", "Could not process bitmap array");
+            MainActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast.makeText(MainActivity.this,
+                            "Could not process image into array", Toast.LENGTH_LONG).show();
+                    Log.e("Image Array", "Could not process bitmap array");
+                }
+            });
+
         }
 
         for (int i = 0; i < w*h; i++) {
@@ -422,37 +349,114 @@ public class MainActivity extends AppCompatActivity {
 
     public void trace(){
         int[] map = nq.getColorMap();
-        tp.setParams(pixels,w,h,map,minPathSize);
+        tp.setParams(pixels,w,h,map,minPathSize,0,getApplicationContext());
         tp.traceImage();
     }
 
-    public Bitmap blockAverage(int image[], int w, int h){
-        int blockSizeX = 3;
-        int blockSizeY = 3;
-        for(int i=0;i<image.length;i+=blockSizeX)
-            for(int j=0;j<image.length;j+=blockSizeY){
-                if(w - blockSizeX < blockSizeX)
-                    blockSizeX = w - blockSizeX;
-                if(w - blockSizeY < blockSizeY)
-                    blockSizeY = h - blockSizeY;
-                int avg = 0;
-                for(int k=0;k<blockSizeX;k++)
-                    for(int l=0;l<blockSizeY;l++)
-                        avg+= image[(h*(j+l)) + (i+k)];
-                avg/=(blockSizeX*blockSizeY);
-                for(int k=0;k<blockSizeX;k++)
-                    for(int l=0;l<blockSizeY;l++)
-                        image[(h*(j+l)) + (i+k)] = avg;
+    @SuppressLint("NewApi")
+    Bitmap BlurImage (Bitmap input,int radius)
+    {
+        try
+        {
+            RenderScript rsScript = RenderScript.create(getApplicationContext());
+            Allocation alloc = Allocation.createFromBitmap(rsScript, input);
+            ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(rsScript,   Element.U8_4(rsScript));
+            blur.setRadius(radius);
+            blur.setInput(alloc);
+
+            Bitmap result = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
+            Allocation outAlloc = Allocation.createFromBitmap(rsScript, result);
+
+            blur.forEach(outAlloc);
+            outAlloc.copyTo(result);
+
+            rsScript.destroy();
+            return result;
+        }
+        catch (Exception e) {
+            // TODO: handle exception
+            return input;
+        }
+
+    }
+    private Uri outputFileUri;
+
+    private void openImageIntent() {
+
+        // Determine Uri of camera image to save.
+        final File root = new File(Environment.getExternalStorageDirectory() + File.separator + "VectorUp" + File.separator);
+        root.mkdirs();
+        final String fname = System.currentTimeMillis()+"_img.jpg";
+        final File sdImageMainDirectory = new File(root, fname);
+        outputFileUri = Uri.fromFile(sdImageMainDirectory);
+
+        // Camera.
+        final List<Intent> cameraIntents = new ArrayList<Intent>();
+        final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        final PackageManager packageManager = getPackageManager();
+        final List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
+        for(ResolveInfo res : listCam) {
+            final String packageName = res.activityInfo.packageName;
+            final Intent intent = new Intent(captureIntent);
+            intent.setComponent(new ComponentName(packageName, res.activityInfo.name));
+            intent.setPackage(packageName);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+            cameraIntents.add(intent);
+        }
+
+        // Filesystem.
+        final Intent galleryIntent = new Intent();
+        galleryIntent.setType("image/*");
+        galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+        // Chooser of filesystem options.
+        final Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
+
+        // Add the camera options.
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
+
+        startActivityForResult(chooserIntent, REQUEST_CHOOSER);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CHOOSER) {
+                final boolean isCamera;
+                if (data == null) {
+                    isCamera = true;
+                } else {
+                    final String action = data.getAction();
+                    if (action == null) {
+                        isCamera = false;
+                    } else {
+                        isCamera = action.equals(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    }
+                }
+                Uri selectedImageUri;
+                if (isCamera) {
+                    selectedImageUri = outputFileUri;
+                } else {
+                    selectedImageUri = data == null ? null : data.getData();
+                }
+
+                if(selectedImageUri != null){
+                    final String path = FileUtils.getPath(this, selectedImageUri);
+                    try{
+                        image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                    }catch(IOException e){
+                        Toast.makeText(MainActivity.this,
+                                "Could not load image", Toast.LENGTH_LONG).show();
+                    }
+                    refreshCanvas(image);
+                    this.w = image.getWidth();
+                    this.h = image.getHeight();
+                    Toast.makeText(MainActivity.this,
+                            w+"x"+h+" image selected", Toast.LENGTH_LONG).show();
+                    startButton.setEnabled(true);
+                    startButton.setText("Vectorize");
+                }
             }
-        Bitmap newImg = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
-        newImg.setPixels(image, 0, w, 0, 0, w, h);
-        return newImg;
+        }
     }
-
-    public Bitmap preprocess(Bitmap image){
-        int[] imageArray = new int[image.getWidth() * image.getHeight()];
-        image.getPixels(imageArray, 0, image.getWidth(), 0, 0, image.getWidth(), image.getHeight());
-        return blockAverage(imageArray,w,h);
-    }
-
 }

@@ -1,11 +1,15 @@
 package com.vmu.vectormeup.threading;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Space;
 import android.widget.TextView;
 
 import com.vmu.vectormeup.MainActivity;
@@ -13,7 +17,13 @@ import com.vmu.vectormeup.spline.SPath;
 import com.vmu.vectormeup.spline.SplineManager;
 import com.vmu.vectormeup.trace.Contour;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +47,9 @@ public class TracePool {
     ArrayList<SPath> paths;
     TextView progressText;
     MainActivity main;
+    int mode = 0;
+    Context context;
+    StringBuilder svgData;
 
     class UpdateThread implements Runnable{
         int[] image;
@@ -76,6 +89,7 @@ public class TracePool {
                     progressText.setText("Creating Paths");
                 }
             });
+            svgData = new StringBuilder("<svg  xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink= \"http://www.w3.org/1999/xlink\" width=\""+w+"\" height=\""+h+"\">");
 
             Paint p = new Paint();
             p.setColor(Color.GREEN);
@@ -83,24 +97,37 @@ public class TracePool {
             p.setStyle(Paint.Style.STROKE);
             canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
 
-            for(int i=0;i<paths.size();i++)
-                if(paths.get(i).getPaint().getColor() == Color.WHITE && paths.get(i).size() > 0)
-                    canvas.drawPath(paths.get(i).get(0),paths.get(i).getPaint());
+            if(mode == 0){ //Ordered mode. Paths drawn in order of size
+                SPath result = new SPath(100000);
+                for(int i=0;i<paths.size();i++)
+                    result.addAll(paths.get(i));
 
-            for(int i=0;i<paths.size();i++){
-                if(paths.get(i).getPaint().getColor() != Color.WHITE)
-                    for(int j=0;j<paths.get(i).size();j++){
-                        canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
-                    }
+                Collections.sort(result);
+
+                for(int i=0;i<result.size();i++){
+                    canvas.drawPath(result.get(i),result.get(i).getPaint());
+                    svgData.append(result.get(i).getPathText());
+                }
+            }else{ //Unordered mode. Paths drawn by colour
+                for(int i=0;i<paths.size();i++)
+                    if(paths.get(i).getPaint().getColor() == Color.WHITE && paths.get(i).size() > 0)
+                        canvas.drawPath(paths.get(i).get(0),paths.get(i).getPaint());
+
+                for(int i=0;i<paths.size();i++){
+                    if(paths.get(i).getPaint().getColor() != Color.WHITE)
+                        for(int j=0;j<paths.get(i).size();j++){
+                            canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+                        }
+                }
+                for(int i=0;i<paths.size();i++){
+                    if(paths.get(i).getPaint().getColor() == Color.WHITE)
+                        for(int j=1;j<paths.get(i).size();j++){
+                            canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
+                        }
+                }
             }
-            for(int i=0;i<paths.size();i++){
-                if(paths.get(i).getPaint().getColor() == Color.WHITE)
-                    for(int j=1;j<paths.get(i).size();j++){
-                        canvas.drawPath(paths.get(i).get(j),paths.get(i).getPaint());
-                    }
-            }
-
-
+            svgData.append("</svg>");
+            writeToFile("svgdata.svg",svgData.toString());
         }
     }
 
@@ -123,7 +150,7 @@ public class TracePool {
         this.count = 0;
     }
 
-    public void setParams(int[] image,int w, int h, int[] map,int minp){
+    public void setParams(int[] image,int w, int h, int[] map,int minp,int mode,Context context){
         this.image = image;
         this.w = w;
         this.h = h;
@@ -132,6 +159,8 @@ public class TracePool {
         paths = new ArrayList<SPath>(count);
         traceQueue = new LinkedBlockingQueue<>(count);
         minPathSize = minp;
+        this.mode = mode;
+        this.context = context;
 
     }
 
@@ -183,7 +212,6 @@ public class TracePool {
 
         try {
             threadpool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-
             UpdateThread u = new UpdateThread(canvas,paths,edges);
             u.run();
             isBusy = false;
@@ -192,6 +220,24 @@ public class TracePool {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void writeToFile(String filename,String contents){
+        final File root = new File(Environment.getExternalStorageDirectory() + File.separator + "VectorUp" + File.separator);
+        final File svgFile = new File(root, filename);
+        FileOutputStream outputStream;
+        try {
+            System.out.println("File: "+svgFile.getAbsolutePath());
+            System.out.println(contents);
+            outputStream = new FileOutputStream(svgFile);
+            outputStream.write(contents.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
     }
 
 }

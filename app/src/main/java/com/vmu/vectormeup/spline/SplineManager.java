@@ -23,7 +23,7 @@ public class SplineManager {
    ArrayList<SPath> paths;
    SPath edgePath;
    Pixel startPixel;
-   Path currentPath = new Path();
+   CountedPath currentPath = new CountedPath();
    boolean canSetStart = true;
    int minPathSize = 0;
 //   final SeekBar seekBarMaxPoints2 = (SeekBar) findViewById(R.id.maxPoints2);
@@ -63,15 +63,13 @@ public class SplineManager {
 
     public void draw(Contour pixels) {
         paint.setColor(pixels.getColor());
-        paint.setStrokeWidth(2);
-
+        paint.setStrokeWidth(3 );
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 //        System.out.println("Contour of size " + pixels.size() + "for thread "+Thread.currentThread().getId());
         if (pixels.size() > 1) {
             for (int i = 0; i < pixels.size(); i++) {
                 if (i >= 0) {
                     Pixel pixel = pixels.get(i);
-
                     if (i == 0) {
                         Pixel next = pixels.get(i + 1);
                         pixel.setDifferentials(((next.getX() - pixel.getX()) / 3), ((next.getY() - pixel.getY()) / 3));
@@ -88,31 +86,46 @@ public class SplineManager {
         }
         boolean start = true;
         int pointCount = 0;
+        currentPath.setPaint(paint);
+        currentPath.startPathText();
         for (int i = 0; i < pixels.size(); i++) {
             Pixel pixel = pixels.get(i);
-            if (pixel.isStart() && start == false) {
+            if (!pixel.isStart() && i%2 == 0){
+                pixels.remove(i);
+                pixel = pixels.get(i);
+            }
+
+                if (pixel.isStart() && start == false) { //Checks if the pixel is a start pixel and not the first pixel in the path
                 currentPath.close();
-                if (pointCount >= minPathSize)
+                if (pointCount >= minPathSize){ //Adds the path is it is larger than the minimum path size
+                    currentPath.setCount(pointCount);
+                    currentPath.completePathText();
                     edgePath.add(currentPath);
-
+                }
+                //Resets path to begin new path at next pixel
                 pointCount = 0;
-                currentPath = new Path();
+                currentPath = new CountedPath();
+                currentPath.setPaint(paint);
+                currentPath.startPathText();
+                i++;
 
-//                canvas.drawPath(currentPath, paint);
-                if (i < pixels.size() - 1) {
+                if (i < pixels.size() - 1) { //Selects a new start pixel if not the final pixel
                     start = true;
                     continue;
                 }
             }
-            if (start == true) {
+            if (start == true) { //Checks if pixel is a start pixel and begins the path
                 start = false;
                 currentPath.moveTo(pixel.getX(), pixel.getY());
+                currentPath.addToPathText("M "+pixel.getX() + " " + pixel.getY());
                 pointCount++;
-            } else if (i < pixels.size() - 1) {
+            } else if (i < pixels.size() - 1) { //Draws a cubic spline using previous and next pixels as anchor points
                 Pixel prev = pixels.get(i - 1);
                 Pixel next = pixels.get(i + 1);
                 currentPath.cubicTo(prev.getX(), prev.getY(), pixel.getX(), pixel.getY(), next.getX(), next.getY());
+                currentPath.addToPathText("C "+prev.getX() + " " + prev.getY()+ " " + pixel.getX()+ " " + pixel.getY()+ " " + next.getX()+ " " + next.getY());
                 pointCount++;
+                i++;
             }
         }
         System.out.println(edgePath.size());

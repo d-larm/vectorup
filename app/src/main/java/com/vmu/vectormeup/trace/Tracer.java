@@ -420,7 +420,7 @@ public class Tracer {
     }
 
     public Contour trace(){
-        Contour edge = new Contour(activeColor,w*h/4);
+        Contour edge = new Contour(activeColor,w*h/16);
         int sampleRate = 1;
         int resolution = 8;
         int count = 0;
@@ -455,7 +455,9 @@ public class Tracer {
                 //Stage 1
                 if(getPixelAtDirection(BEHIND_LEFT) == activeColor){ //Case 1
                     if(getPixelAtDirection(LEFT) == activeColor){
-                        advanceTracer(edge,LEFT,LEFT,INNER);
+//                        advanceTracer(edge,LEFT,LEFT,INNER);
+                        moveTracer(LEFT);
+                        changeDirection(LEFT);
                         advanceTracer(edge,LEFT,LEFT,-1);
 //                        moveTracer(LEFT);
 //                        changeDirection(LEFT);
@@ -481,7 +483,9 @@ public class Tracer {
                 //Stage 2
                 if(getPixelAtDirection(AHEAD_LEFT) == activeColor) { //Case 6
                     if (getPixelAtDirection(AHEAD) == activeColor) {
-                        advanceTracer(edge, AHEAD, LEFT, INNER);
+//                        advanceTracer(edge, AHEAD, LEFT, INNER);
+                        moveTracer(AHEAD);
+                        changeDirection(LEFT);
                         advanceTracer(edge, AHEAD, RIGHT, -1);
 //                        moveTracer(AHEAD);
 //                        changeDirection(RIGHT);

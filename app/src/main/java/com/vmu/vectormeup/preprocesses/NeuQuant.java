@@ -51,7 +51,7 @@ import android.widget.ImageView;
 
 public class NeuQuant {
     
-    public static final int ncycles	=	500;			// no. of learning cycles
+    public static final int ncycles	=	1000;			// no. of learning cycles
 
     private static int netsize;		// number of colours used
     public static final int specials  = 3;		// number of reserved colours used
